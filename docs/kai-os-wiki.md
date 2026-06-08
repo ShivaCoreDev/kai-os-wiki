@@ -2291,6 +2291,20 @@ KAI-OS betreibt ein öffentliches Bug-Bounty-Programm:
 
 # 17. Roadmap
 
+<!-- ROADMAP_AUTO_UPDATE_START -->
+> **🔄 Roadmap zuletzt synchronisiert:** 2026-06-08 · HEAD `e2f7ec6a42` (2026-06-08) · 17 offene Issues · 10 letzte Commits
+>
+> **Sprint 2.2** — offene Issues: #19, #18, #17, #16, #15, #14, #8
+>
+> **Sprint 2.3** — offene Issues: #12, #10, #5, #2
+>
+> **Sprint 2.5** — offene Issues: #13
+>
+> **Sprint 2.7** — offene Issues: #20
+>
+> **Sprint 2.8** — offene Issues: #11, #3
+<!-- ROADMAP_AUTO_UPDATE_END -->
+
 > Die technische Roadmap ist in vier Hauptphasen unterteilt. Jede Phase ist in **Sprints** (2-Wochen-Zyklen) gegliedert mit konkreten Entwicklungsaufgaben, integrierten **Fehlerbehebungsschritten**, **Deployment-Checklisten**, Abhängigkeiten und messbaren KPIs.
 
 **Legende:**
@@ -8323,107 +8337,79 @@ Docusaurus-Setup (einmalig, lokal ausführen):
 
 ---
 
+
+---
+
 # 31. Live-Projektstatus — Echtdaten (Auto-generiert)
 
-> **Auto-generiert:** Dieser Abschnitt wird automatisch bei jedem Sync aktualisiert.
-> **Letzte Aktualisierung:** 2026-06-08 · Branch: `feature/kai-os-integration`
+> **Auto-generiert:** 2026-06-08 · Aurora (KAI-OS Agent)
 > **Quelle:** GitHub API + Notion + Chat-Verlauf
+> **Branch:** `feature/kai-os-integration` · HEAD: `e2f7ec6a42` (2026-06-08)
 
-## 31.1 Repository-Status
+## 31.1 Repository-Snapshot
 
 | Metrik | Wert |
 |--------|------|
-| **Repository** | `A-TownChain-Okosystems/a-townchain-os` |
-| **Haupt-Branch** | `feature/kai-os-integration` |
-| **HEAD Commit** | `e2f7ec6a42` (2026-06-08) |
-| **Repo-Größe** | 485 KB |
-| **Offene Issues** | 17 |
-| **Stars** | 1 |
-| **Wiki im Repo** | v1.0.0-alpha · 7.474 Zeilen (veraltet, Patch ausstehend) |
-| **Wiki lokal** | v1.3.2-beta · 8.321 Zeilen (aktuell) |
+| **Repo** | `A-TownChain-Okosystems/a-townchain-os` |
+| **HEAD** | `e2f7ec6a42` (2026-06-08) |
+| **Offene Issues** | 17 gesamt · 8 🔴 High · 8 🟡 Medium |
+| **Wiki lokal** | v1.3.3-beta (Live-Sync aktiv) |
+| **Wiki-Repo** | [ShivaCoreDev/kai-os-wiki](https://github.com/ShivaCoreDev/kai-os-wiki) |
 
-> 🔴 **Sync-Gap:** Repo-Wiki ist 847 Zeilen hinter dem lokalen Stand.
-> **Fix:** `git am kai_os_sync.patch && git push origin main`
+## 31.2 Letzte Commits
 
----
+| SHA | Datum | Message |
+|-----|-------|---------|
+| `e2f7ec6a42` | 2026-06-08 | 🔄 sync: sync_report.html |
+| `3b42d32de9` | 2026-06-08 | 🔄 sync: ecdsa_impl.py |
+| `55a0864bda` | 2026-06-08 | 🔄 sync: ecdsa_final.py |
+| `1dfe8864c5` | 2026-06-08 | 🔄 sync: bootscreen_complete.py |
+| `bd9c49598c` | 2026-06-08 | 🔄 sync: atc_issues_summary.py |
+| `92d4f88ee3` | 2026-06-08 | 🎨 ATC-UI: sync atc-ui/index.html |
+| `3f57f22983` | 2026-06-08 | 🏗️ ShivaOS: sync shivaos/shell/__init__.py |
+| `49b7410712` | 2026-06-08 | 🏗️ ShivaOS: sync shivaos/pkg/__init__.py |
 
-## 31.2 Letzte Commits (feature/kai-os-integration)
-
-| SHA | Datum | Autor | Message |
-|-----|-------|-------|---------|
-| `e2f7ec6a42` | 2026-06-08 | ShivaCoreDev | 🔄 sync: sync_report.html |
-| `3b42d32de9` | 2026-06-08 | ShivaCoreDev | 🔄 sync: ecdsa_impl.py |
-| `55a0864bda` | 2026-06-08 | ShivaCoreDev | 🔄 sync: ecdsa_final.py |
-| `1dfe8864c5` | 2026-06-08 | ShivaCoreDev | 🔄 sync: bootscreen_complete.py |
-| `bd9c49598c` | 2026-06-08 | ShivaCoreDev | 🔄 sync: atc_issues_summary.py |
-
----
-
-## 31.3 Offene GitHub Issues (17 offen)
-
-> Cross-Referenz: Issues spiegeln den realen Entwicklungsstand der Layer-Architektur.
+## 31.3 Offene Issues nach Layer
 
 | # | Titel | Layer | Priorität |
-|---|-------|-------|-----------|
-| [#20](https://github.com/A-TownChain-Okosystems/a-townchain-os/issues/20) | 🧪 API-Gateway-Tests — Unit & Integrationstests | L7 (API-Gateway) | 🔴 High |
-| [#19](https://github.com/A-TownChain-Okosystems/a-townchain-os/issues/19) | 📊 Testnet Node-Monitoring Dashboard | L5 (P2P) | 🟡 Medium |
-| [#18](https://github.com/A-TownChain-Okosystems/a-townchain-os/issues/18) | 🐳 Docker Compose — 5-Node lokales Netzwerk | L1 (Hardware/Infra) | 🟡 Medium |
-| [#17](https://github.com/A-TownChain-Okosystems/a-townchain-os/issues/17) | ⛓ Longest-Chain-Rule — Fork-Auflösung | L4 (Blockchain) | 🔴 High |
-| [#16](https://github.com/A-TownChain-Okosystems/a-townchain-os/issues/16) | 🔄 Initial Sync — Neue Nodes synchronisieren | L5 (P2P/Network) | 🔴 High |
-| [#15](https://github.com/A-TownChain-Okosystems/a-townchain-os/issues/15) | 📡 Block Propagation — P2P Broadcasting | L5 (P2P/Network) | 🔴 High |
-| [#14](https://github.com/A-TownChain-Okosystems/a-townchain-os/issues/14) | 🌐 Bootstrap Node — P2P Discovery | L5 (P2P/Network) | 🔴 High |
-| [#13](https://github.com/A-TownChain-Okosystems/a-townchain-os/issues/13) | 🛒 ATC Marketplace — Shivamon kaufen & verkaufen | L11 (DeFi/Marketplace) | 🟡 Medium |
-| [#12](https://github.com/A-TownChain-Okosystems/a-townchain-os/issues/12) | ⛓ Solidity Smart Contracts — On-Chain ATC Token | L4 (Blockchain) | 🟡 Medium |
-| [#11](https://github.com/A-TownChain-Okosystems/a-townchain-os/issues/11) | 🥚 Shivamon Breeding — Gen 2 NFT Züchtung | L12 (Gamification) | 🟡 Medium |
-| [#10](https://github.com/A-TownChain-Okosystems/a-townchain-os/issues/10) | 🌉 Cross-Chain Bridge — ATC ↔ EVM | L4 (Blockchain/Bridge) | 🟢 Low |
-| [#9](https://github.com/A-TownChain-Okosystems/a-townchain-os/issues/9) | 🏛 Governance Contract DAO Voting | L8 (Governance) | 🟡 Medium |
-| [#8](https://github.com/A-TownChain-Okosystems/a-townchain-os/issues/8) | 🌐 Multi-Node Testnet — P2P live | L5 (P2P/Network) | 🔴 High |
-| [#7](https://github.com/A-TownChain-Okosystems/a-townchain-os/issues/7) | 📦 Build System — EXE / AppImage | L1 (Infra) | 🟡 Medium |
-| [#5](https://github.com/A-TownChain-Okosystems/a-townchain-os/issues/5) | 🌐 Blockchain Explorer — Block & TX Browser | L10 (dApp) | 🟡 Medium |
-| [#3](https://github.com/A-TownChain-Okosystems/a-townchain-os/issues/3) | ⚔️ Shivamon Battle UI — Animierte Kämpfe | L12 (Gamification) | 🔴 High |
-| [#2](https://github.com/A-TownChain-Okosystems/a-townchain-os/issues/2) | 🤖 Gemini AI Integration — Live AI-Chat | L3 (KI-Modul) | 🔴 High |
+|---|-------|-------|----------|
+| [#20](https://github.com/A-TownChain-Okosystems/a-townchain-os/issues/20) | 🧪 API-Gateway-Tests — Unit & Integrationstests für Port | L7 | 🔴 High |
+| [#19](https://github.com/A-TownChain-Okosystems/a-townchain-os/issues/19) | 📊 [Testnet] Node-Monitoring Dashboard | L5 | 🟡 Medium |
+| [#18](https://github.com/A-TownChain-Okosystems/a-townchain-os/issues/18) | 🐳 [Testnet] Docker Compose — 5-Node lokales Netzwerk | L5 | 🟡 Medium |
+| [#17](https://github.com/A-TownChain-Okosystems/a-townchain-os/issues/17) | ⛓ [Testnet] Longest-Chain-Rule — Fork-Auflösung | L5 | 🔴 High |
+| [#16](https://github.com/A-TownChain-Okosystems/a-townchain-os/issues/16) | 🔄 [Testnet] Initial Sync — Neue Nodes synchronisieren | L5 | 🔴 High |
+| [#15](https://github.com/A-TownChain-Okosystems/a-townchain-os/issues/15) | 📡 [Testnet] Block Propagation — P2P Block Broadcasting | L5 | 🔴 High |
+| [#14](https://github.com/A-TownChain-Okosystems/a-townchain-os/issues/14) | 🌐 [Testnet] Bootstrap Node — P2P Discovery Service | L5 | 🔴 High |
+| [#13](https://github.com/A-TownChain-Okosystems/a-townchain-os/issues/13) | 🛒 ATC Marketplace — Shivamon kaufen & verkaufen | L11 | 🟡 Medium |
+| [#12](https://github.com/A-TownChain-Okosystems/a-townchain-os/issues/12) | ⛓ Solidity Smart Contracts — On-Chain ATC Token | L3 | 🟡 Medium |
+| [#11](https://github.com/A-TownChain-Okosystems/a-townchain-os/issues/11) | 🥚 Shivamon Breeding — Gen 2 NFT Züchtung | L12 | 🟡 Medium |
+| [#10](https://github.com/A-TownChain-Okosystems/a-townchain-os/issues/10) | 🌉 Cross-Chain Bridge — ATC ↔ EVM Interoperabilität | L3 | 🟢 Low |
+| [#9](https://github.com/A-TownChain-Okosystems/a-townchain-os/issues/9) | 🏛 Governance Contract (ATC-9900) — DAO Voting | L8 | 🟡 Medium |
+| [#8](https://github.com/A-TownChain-Okosystems/a-townchain-os/issues/8) | 🌐 Multi-Node Testnet — P2P Netzwerk live schalten | L5 | 🔴 High |
+| [#7](https://github.com/A-TownChain-Okosystems/a-townchain-os/issues/7) | 📦 Build System — EXE / AppImage Installer | L1 | 🟡 Medium |
+| [#5](https://github.com/A-TownChain-Okosystems/a-townchain-os/issues/5) | 🌐 ATC Blockchain Explorer — Block & TX Browser | L3 | 🟡 Medium |
+| [#3](https://github.com/A-TownChain-Okosystems/a-townchain-os/issues/3) | ⚔️ Shivamon Battle UI — Animierte Kämpfe im Browser | L12 | 🔴 High |
+| [#2](https://github.com/A-TownChain-Okosystems/a-townchain-os/issues/2) | 🤖 Gemini AI Integration — Live AI-Chat im Dashboard | L3 | 🔴 High |
+
+## 31.4 Sprint-Mapping (offene Issues → Sprints)
+
+| Sprint | Layer | Offene Issues |
+|--------|-------|-------------- |
+| Sprint 2.1 | L2, L4 | — |
+| Sprint 2.2 | L5 | #19, #18, #17, #16, #15, #14, #8 |
+| Sprint 2.3 | L3 | #12, #10, #5, #2 |
+| Sprint 2.4 | L9 | — |
+| Sprint 2.5 | L4, L11 | #13 |
+| Sprint 2.6 | L6 | — |
+| Sprint 2.7 | L7 | #20 |
+| Sprint 2.8 | L0, L12 | #11, #3 |
+
+## 31.5 Notion-Sync
+
+| Datenbank | Einträge | URL |
+|-----------|---------|-----|
+| KAI-OS Wiki Kapitel | 31/31 | [Öffnen](https://app.notion.com/p/379b826db85c815ab865c6eee41815cb) |
+| PR #22 Tracking | 1 | [Öffnen](https://app.notion.com/p/373b826db85c8125ba83f04995191bf0) |
 
 ---
-
-## 31.4 Layer-Implementierungsstand (Echtdaten)
-
-| Layer | Bezeichnung | Substrate-Pallet | Status | Offene Issues |
-|-------|-------------|-----------------|--------|---------------|
-| L0 | Security (S1–S6) | cross-cutting | ✅ Spezifiziert | — |
-| L1 | Hardware/Infra | — | 🔄 #7, #18 | #7, #18 |
-| L2 | Kernel | `shivaos/kernel/` (Python) | 🔄 Legacy | — |
-| L3 | KI-Modul | `pallet-ai-registry` | ✅ Code ready | #2 |
-| L4 | Blockchain | `pallet-poh` + Legacy | 🔄 Hybrid | #12, #17 |
-| L5 | P2P/Network | `shivaos/net/` (Python) | 🔄 #8, #14–16 | #8, #14, #15, #16 |
-| L6 | Storage | `shivaos/fs/` (Python) | 🔄 Legacy | — |
-| L7 | API-Gateway | `backend/gateway/` | 🔄 #20 | #20 |
-| L8 | Governance | DAO Contract ausstehend | 🔄 #9 | #9 |
-| L9 | Agent | `pallet-agent-registry` | ✅ Code ready | — |
-| L10 | dApp | ATC-UI (HTML) | 🔄 #5 | #5 |
-| L11 | DeFi | Spezifiziert (Kap. 26) | 📋 Sprint 3.x | #10, #13 |
-| L12 | Gamification | ShivamonNFT.ink (geplant) | 📋 Sprint 3.7 | #3, #11 |
-
----
-
-## 31.5 Pull Request Status
-
-| PR | Titel | Branch | Status | Commits | Dateien |
-|----|-------|--------|--------|---------|---------|
-| [#22](https://github.com/A-TownChain-Okosystems/a-townchain-os/pull/22) | 🚀 KAI-OS v1.3.2-beta — Substrate + DevOps | `feature/kai-os-integration → main` | 🟡 Open | 71 | 50 (+12.802 / -2) |
-| [#21](https://github.com/A-TownChain-Okosystems/a-townchain-os/pull/21) | build(deps): Bump flask-cors 4.0.1→6.0.0 | `dependabot/... → feature/kai-os-integration` | 🟡 Open | 1 | 1 |
-
----
-
-## 31.6 Notion-Sync-Status
-
-| Datenbank | ID | Einträge | Letzter Sync |
-|-----------|----|---------|--------------|
-| KAI-OS Wiki — 30 Kapitel | `379b826d-b85c-815a-b865-c6eee41815cb` | 30/30 | 2026-06-08 |
-| PR #22 Tracking-Seite | `379b826d-b85c-8153-8b90-c88ea63fe3f4` | 1 | 2026-06-08 |
-
-> 🔗 [Notion Master Roadmap](https://app.notion.com/p/373b826db85c8125ba83f04995191bf0)
-> 🔗 [Notion Wiki-Datenbank](https://app.notion.com/p/379b826db85c815ab865c6eee41815cb)
-
----
-
-> *Automatisch generiert von Aurora (KAI-OS Agent) · Nächster Sync: alle 6h (GitHub+Notion) · täglich 08:00 Uhr (Wiki-Erweiterung)*
+> *Nächster Auto-Sync: täglich 08:00 Uhr + alle 6h · Aurora (KAI-OS Agent)*
