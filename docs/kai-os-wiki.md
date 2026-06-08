@@ -8417,3 +8417,65 @@ Docusaurus-Setup (einmalig, lokal ausführen):
 
 ---
 > *Nächster Auto-Sync: täglich 08:00 Uhr + alle 6h · Aurora (KAI-OS Agent)*
+
+
+---
+
+# 32. Bug-Tracker & Todo-Liste (Auto-generiert)
+
+> **Auto-generiert:** 2026-06-08 · Aurora (KAI-OS Agent)
+> **System:** Automatische Fehler-Erkennung alle 12h
+> **Fix-Patches:** [ShivaCoreDev/kai-os-wiki/patches/](https://github.com/ShivaCoreDev/kai-os-wiki/tree/main/patches)
+
+## 32.1 Kritische Bugs (sofort beheben)
+
+| # | Datei | Fehler | Fix verfügbar | Status |
+|---|-------|--------|--------------|--------|
+| B1 | `gateway/main.py` | `create_app()` fehlt — 15/16 Tests skipped | ✅ `patches/gateway_main.py` | 🔴 Offen |
+| B2 | `gateway/router.py` | `forward()` abgeschnitten (endet auf `b`) | ✅ `patches/gateway_router.py` | 🔴 Offen |
+| B3 | `blockchain/consensus/poh.py` | `tick_n()` Body fehlt | ✅ `patches/poh_fixed.py` | 🔴 Offen |
+| B4 | `requirements.txt` | `google-generativeai` fehlt → ImportError | ✅ `patches/APPLY_FIXES.sh` | 🔴 Offen |
+
+## 32.2 Fehlende Implementierungen
+
+| # | Feature | Datei | Issue | Sprint | Layer | Status |
+|---|---------|-------|-------|--------|-------|--------|
+| M1 | Bootstrap Node P2P | `blockchain/nodes/discovery.py` | #14 | 2.2 | L5 | 🔴 Fehlt |
+| M2 | `sync_from_peer()` Initial Sync | `blockchain/nodes/node.py` | #16 | 2.2 | L5 | ✅ Fix bereit |
+| M3 | Longest-Chain-Rule / Fork-Auflösung | `blockchain/consensus/hybrid_consensus.py` | #17 | 2.2 | L4 | 🔴 Fehlt |
+| M4 | `broadcast_block()` parallel (asyncio) | `blockchain/nodes/p2p_propagation.py` | #15 | 2.2 | L5 | 🟡 Partial |
+| M5 | ATC-9900 Governance Contract | `blockchain/contracts/governance/` | #9 | 3.4 | L8 | ✅ Fix bereit |
+| M6 | Docker Compose 5-Node Testnet | `docker-compose.yml` | #18 | 2.2 | L1 | ✅ Fix bereit |
+| M7 | ATC-8300 Solidity Token | `blockchain/contracts/atc8300/ATC8300Token.sol` | #12 | 2.5 | L4 | 🔴 Fehlt |
+| M8 | Node Monitoring Dashboard | `frontend/monitoring/` | #19 | 2.8 | L10 | 🔴 Fehlt |
+
+## 32.3 Test-Lücken
+
+| Test-Datei | Tests | Übersprungen | Ursache | Fix |
+|-----------|-------|-------------|---------|-----|
+| `tests/test_gateway.py` | 16 | 15 | `create_app()` fehlt (B1) | B1 lösen |
+| `tests/test_p2p_propagation.py` | 9 | 0 | 1 TODO: async broadcast fehlt | M4 |
+
+## 32.4 Fixes anwenden (1 Befehl)
+
+```bash
+# Im Stammverzeichnis von a-townchain-os:
+bash <(curl -s https://raw.githubusercontent.com/ShivaCoreDev/kai-os-wiki/main/patches/APPLY_FIXES.sh)
+
+# Danach testen & committen:
+python -m pytest tests/ -v --tb=short
+git add -A && git commit -m "fix: Aurora Bug-Fixes B1-B4, M2, M5, M6" && git push
+```
+
+## 32.5 Todo-Fortschritt
+
+| Kategorie | Gesamt | Offen | In Bearbeitung | Behoben |
+|-----------|--------|-------|----------------|---------|
+| 🔴 Critical Bugs | 4 | 4 | 0 | 0 |
+| 🟠 Missing Code | 8 | 6 | 2 | 0 |
+| 🧪 Test-Lücken | 2 | 1 | 1 | 0 |
+| 🏗️ Infrastructure | 2 | 1 | 1 | 0 |
+| **Gesamt** | **16** | **12** | **4** | **0** |
+
+---
+> *Automatisch aktualisiert alle 12h · Patches bereit: [github.com/ShivaCoreDev/kai-os-wiki/patches](https://github.com/ShivaCoreDev/kai-os-wiki/tree/main/patches)*
