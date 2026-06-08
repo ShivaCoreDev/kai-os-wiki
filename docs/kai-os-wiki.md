@@ -2305,6 +2305,7 @@ KAI-OS betreibt ein öffentliches Bug-Bounty-Programm:
 > **Sprint 2.8** — offene Issues: #11, #3
 <!-- ROADMAP_AUTO_UPDATE_END -->
 
+
 > Die technische Roadmap ist in vier Hauptphasen unterteilt. Jede Phase ist in **Sprints** (2-Wochen-Zyklen) gegliedert mit konkreten Entwicklungsaufgaben, integrierten **Fehlerbehebungsschritten**, **Deployment-Checklisten**, Abhängigkeiten und messbaren KPIs.
 
 **Legende:**
@@ -8334,6 +8335,9 @@ Docusaurus-Setup (einmalig, lokal ausführen):
 *KAI-OS Wiki v1.3.2-beta — Juni 2026*
 
 > **Mitmachen:** [GitHub](https://github.com/kai-os) · [Discord](https://discord.gg/kai-os) · [Forum](https://forum.kai-os.dev) · [Bug Bounty](mailto:security@kai-os.dev)
+
+---
+
 
 ---
 
