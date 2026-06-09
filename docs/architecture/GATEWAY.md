@@ -1,112 +1,168 @@
-# ⚡ API Gateway — Technische Dokumentation
-
-> **Port:** 4000 · **Datei:** `gateway/main.py`
+# 🔀 API Gateway — Technische Dokumentation
+**Stand:** 09.06.2026 | **Version:** v2.1.0 | **Dateien:** `gateway/`
 
 ---
 
 ## Überblick
 
-Das API Gateway ist der **einzige Kommunikationspunkt** zwischen Frontend und Backend. Das Frontend spricht ausschließlich mit dem Gateway — nie direkt mit einem Backend-Service.
+Das API-Gateway ist der **einzige Einstiegspunkt** für alle Frontend-Anfragen. Das Frontend kommuniziert **ausschließlich** mit Port 4000 — niemals direkt mit dem Backend.
 
 ```
-Frontend (Browser)
-    │  api.js → alle Calls gehen an :4000
-    ▼
-API Gateway (:4000)
-    ├── Auth Middleware      ← X-API-Key prüfen
-    ├── Rate Limiter         ← 100 req / 60s
-    ├── Request Logger       ← alle Calls loggen
-    └── Router               ← leitet weiter an:
-         ├── Core    :5000   ← /api/status, /api/modules
-         ├── Chain   :5001   ← /api/blockchain/*
-         ├── Wallet  :5002   ← /api/wallet/*
-         ├── AI      :5003   ← /api/ai/*
-         ├── Game    :5004   ← /api/game/*
-         └── Nodes   :5005   ← /api/nodes/*
+BROWSER / EXTERNAL CLIENT
+        │
+        ▼
+┌───────────────────────────────────────────┐
+│         API GATEWAY  :4000               │
+│                                           │
+│  ┌─────────────────────────────────────┐  │
+│  │ Middleware Pipeline                 │  │
+│  │  1. log_request (Logger)            │  │
+│  │  2. require_api_key (Auth)          │  │
+│  │  3. rate_limiter (Rate Limit)       │  │
+│  │  4. signature_verify (TX-Signatur)  │  │
+│  └─────────────────────────────────────┘  │
+│                    │                      │
+│          GatewayRouter                    │
+└──────────────────┬────────────────────────┘
+                   │ Proxy zu :5000
+                   ▼
+┌──────────────────────────────────────────┐
+│          BACKEND API SERVER  :5000       │
+│  /api/blockchain  /api/wallet            │
+│  /api/ai          /api/game              │
+│  /api/governance  /api/marketplace       │
+│  /api/nodes       /api/orchestrator      │
+└──────────────────────────────────────────┘
 ```
 
 ---
 
-## Middleware Stack
+## Middleware
 
-### 1. API Key Auth (`gateway/middleware/auth.py`)
+**Verzeichnis:** `gateway/middleware/`
 
+### 1. Logger (`middleware/logger.py`)
 ```python
-API_KEYS = {
-    "atc-dev-key-2025":  "developer",
-    "atc-admin-key":     "admin",
-}
-
-def auth_middleware(request):
-    key = request.headers.get("X-API-Key")
-    if key not in API_KEYS:
-        return {"error": "Unauthorized"}, 401
-    request.role = API_KEYS[key]
-    return None  # weiter
+@app.before_request
+def log_request():
+    logger.info(f"{request.method} {request.path} — {request.remote_addr}")
 ```
 
-### 2. Rate Limiter (`gateway/middleware/rate_limit.py`)
-
+### 2. Auth (`middleware/auth.py`)
 ```python
-# 100 Requests pro IP pro 60 Sekunden
-RATE_LIMIT   = 100
-WINDOW_SEC   = 60
-request_log  = {}   # ip → [timestamps]
-
-def rate_limit(ip):
-    now    = time.time()
-    window = [t for t in request_log.get(ip,[]) if now-t < WINDOW_SEC]
-    if len(window) >= RATE_LIMIT:
-        return {"error": "Rate limit exceeded"}, 429
-    window.append(now)
-    request_log[ip] = window
-    return None
+def require_api_key(f):
+    """API-Key Authentifizierung für sensitive Endpunkte."""
+    @wraps(f)
+    def decorated(*args, **kwargs):
+        key = request.headers.get("X-API-Key")
+        if not key or not validate_key(key):
+            return jsonify({"error": "Unauthorized"}), 401
+        return f(*args, **kwargs)
+    return decorated
 ```
 
-### 3. Request Logger (`gateway/middleware/logger.py`)
+**Öffentliche Endpunkte** (kein API-Key):
+- `GET /api/blockchain/status`
+- `GET /api/blockchain/height`
+- `GET /api/nodes/peers`
 
-```
-[2026-05-19 21:50:00] POST /api/wallet/create | 200 | 42ms | developer
-[2026-05-19 21:50:01] GET  /api/blockchain/info | 200 | 8ms  | developer
-```
+**Geschützte Endpunkte** (API-Key erforderlich):
+- `POST /api/wallet/send`
+- `POST /api/wallet/sign`
+- `POST /api/ai/chat`
+- Alle Governance-Endpunkte
 
----
-
-## Service-Routing
-
-| Prefix | Service | Port | Beispiel |
-|--------|---------|------|---------|
-| `/api/status` | Core | 5000 | `GET /api/status` |
-| `/api/orchestrator` | Core | 5000 | `GET /api/orchestrator/status` |
-| `/api/blockchain` | Chain | 5001 | `POST /api/blockchain/mine` |
-| `/api/wallet` | Wallet | 5002 | `POST /api/wallet/create` |
-| `/api/ai` | AI | 5003 | `POST /api/ai/query` |
-| `/api/game` | Game | 5004 | `POST /api/game/shivamon/mint` |
-| `/api/nodes` | Nodes | 5005 | `GET /api/nodes/` |
-
----
-
-## Health Check
-
-```bash
-GET http://localhost:4000/gateway/health
-
-{
-  "gateway": "online",
-  "version": "2.0",
-  "services": {
-    "core":       "online",
-    "blockchain": "online",
-    "wallet":     "online",
-    "ai":         "offline",
-    "game":       "online",
-    "nodes":      "online"
-  },
-  "uptime": "2h 14m 33s"
+### 3. Rate Limiter (`middleware/rate_limit.py`)
+```python
+LIMITS = {
+    "/api/ai/":         "10/minute",
+    "/api/wallet/send": "5/minute",
+    "default":          "100/minute",
 }
 ```
 
+### 4. Signature Verify (`middleware/signature_verify.py`)
+```python
+# TX-Signaturen für /api/wallet/send werden vor dem Routing verifiziert
+def verify_tx_signature(tx: dict) -> bool:
+    signer = ECDSASigner()
+    msg    = f"{tx['from']}{tx['to']}{tx['amount']}{tx['nonce']}"
+    return signer.verify(msg, tx['signature'], tx['public_key'])
+```
+
 ---
 
-> **Dokument:** `docs/architecture/GATEWAY.md`
-> **Datum:** 2026-05-19 · **Autor:** ShivaCoreDev × Aurora AI
+## Routing-Tabelle
+
+**Datei:** `gateway/router.py`
+
+| Präfix | Backend-Endpunkt | Beschreibung |
+|--------|-----------------|-------------|
+| `/api/blockchain` | `:5000/api/blockchain` | Chain-Daten |
+| `/api/wallet` | `:5000/api/wallet` | Wallet-Operationen |
+| `/api/ai` | `:5000/api/ai` | Gemini AI |
+| `/api/game` | `:5000/api/game` | Shivamon Spiellogik |
+| `/api/governance` | `:5000/api/governance` | DAO-Abstimmungen |
+| `/api/marketplace` | `:5000/api/marketplace` | NFT-Marketplace |
+| `/api/nodes` | `:5000/api/nodes` | P2P-Nodes |
+| `/api/orchestrator` | `:5000/api/orchestrator` | KI-Orchestrierung |
+
+---
+
+## Vollständige API-Endpunkte
+
+### Blockchain
+```
+GET  /api/blockchain/status          → Chain-Status
+GET  /api/blockchain/height          → Aktuelle Block-Höhe
+GET  /api/blockchain/block/:hash     → Block by Hash
+GET  /api/blockchain/block/:height   → Block by Höhe
+GET  /api/blockchain/tx/:hash        → Transaktion
+GET  /api/blockchain/mempool         → Ausstehende TXs
+POST /api/blockchain/submit-tx       → TX einreichen
+```
+
+### Wallet
+```
+POST /api/wallet/new                 → Neue Wallet
+POST /api/wallet/restore             → Aus Mnemonic
+GET  /api/wallet/balance/:addr       → Balance
+GET  /api/wallet/history/:addr       → TX-Geschichte
+POST /api/wallet/sign                → TX signieren
+POST /api/wallet/send                → TX senden
+```
+
+### AI (Gemini)
+```
+POST /api/ai/chat                    → Chat-Nachricht
+POST /api/ai/analyze-tx              → TX analysieren
+POST /api/ai/explain-contract        → Contract erklären
+POST /api/ai/generate-atclang        → ATCLang Code generieren
+GET  /api/ai/status                  → AI-Status
+```
+
+### Governance
+```
+GET  /api/governance/proposals       → Aktive Vorschläge
+POST /api/governance/propose         → Neuer Vorschlag
+POST /api/governance/vote            → Abstimmen
+GET  /api/governance/results/:id     → Abstimmungsergebnis
+```
+
+---
+
+## Konfiguration
+
+```python
+# gateway/main.py
+CORS(app, origins=["http://localhost:3000", "http://localhost:8080"])
+app.config["BACKEND_BASE"] = os.environ.get("BACKEND_URL", "http://localhost:5000")
+```
+
+**Environment Variables:**
+| Variable | Default | Beschreibung |
+|----------|---------|-------------|
+| `GATEWAY_PORT` | `4000` | Gateway-Port |
+| `BACKEND_URL` | `http://localhost:5000` | Backend-Adresse |
+| `ATC_API_KEY` | — | API-Key für geschützte Endpunkte |
+| `RATE_LIMIT_ENABLED` | `true` | Rate-Limiting an/aus |
