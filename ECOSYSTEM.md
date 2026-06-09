@@ -1,86 +1,82 @@
-# 🌐 A-TownChain Ökosystem — Master Index
+# 🌐 A-TownChain Ökosystem — Master Index v2.0.0
 
-> **Version:** 2.0.0 | **Stand:** Juni 2026 | **KAI-OS:** v1.3.3-beta
+> **Stand:** 2026-06-09 | **KAI-OS:** v2.0.0 | **ATX-Standards:** 186 Module
 >
 > Ein vollständiges, proprietäres KI-Blockchain-Betriebssystem.
-> 13-Layer NFT-Architektur (L0–L12) · 26 Sprints · 4 Phasen
+> **13 Layer (L0–L12)** · **26 Sprints** · **4 Phasen** · **23 Repositories**
 
 ---
 
-## 🗺️ Ökosystem-Karte
+## 🗺️ Layer-Architektur
 
 ```
-┌─────────────────────────────────────────────────────────────────┐
-│                    A-TownChain Ökosystem                        │
-├─────────────────┬───────────────────────┬───────────────────────┤
-│   L12 GAMING    │   L11 DeFi / Finance  │   L10 dApps / Social  │
-│   shivamon      │   atc-contracts       │   atc-ui              │
-│   franchise-f.  │   (ATC-8300/9000/9900)│   (Dashboard)         │
-├─────────────────┴───────────────────────┴───────────────────────┤
-│   L9 Agents │ L8 Governance │ L7 API │ L6 Storage │ L5 Network  │
-│   kai-os    │ atc-contracts  │ atc-   │ shivaos-   │ atcnet      │
-│   (agents)  │ (DAO ATC-9900) │ gateway│ kernel     │ (P2P/DHT)  │
-├─────────────────────────────────────────────────────────────────┤
-│   L4 Blockchain │ L3 AI/KI  │ L2 Kernel │ L1 Hardware           │
-│   a-townchain-os│ kai-os    │ shivaos-  │ (ATPHY Standards)     │
-│   (Consensus)   │ (Orch.)   │ kernel    │                       │
-├─────────────────────────────────────────────────────────────────┤
-│   L0 Security (S1–S6) — Querschnitts-Schicht — ATX Standards   │
-│   atc-standards · atownchain-whitepaper · KAI-OS Wiki           │
-└─────────────────────────────────────────────────────────────────┘
-         ↑ ATCLang (proprietäre Sprache für alle Layer)
+┌─────────────────────────────────────────────────────────────────────┐
+│  L12  shivamon              NFT Gaming, Battle, Breeding            │
+│  L11  atc-contracts         DeFi: Token, Staking, Bridge, Oracle   │
+│  L10  atc-ui / franchise    Dashboard, Business DAO                │
+│  L9   a-townchain-os        KI-Agenten, Orchestrator               │
+│  L8   atc-contracts         Governance DAO (ATC-9900)              │
+│  L7   atc-gateway           API Gateway :4000                      │
+│  L6   shivaos-kernel        ATCFS Dateisystem                      │
+│  L5   atcnet                P2P Netzwerk, Kademlia DHT             │
+│  L4   a-townchain-os        Blockchain, Consensus (PoH→PoS→PoW)   │
+│  L3   a-townchain-os        KI/AI Registry, Gemini Integration     │
+│  L2   shivaos-kernel        Microkernel, IPC, Prozess-Manager      │
+│  L1   (Hardware / ATPHY)    Standards in atc-standards             │
+├─────────────────────────────────────────────────────────────────────┤
+│  L0   atc-standards         Security S1–S6 (Querschnitt)           │
+└─────────────────────────────────────────────────────────────────────┘
+    ATCLang ──── Proprietäre Sprache für alle Layer
+    KAI-OS Wiki ─ Dokumentiert alle Layer (31 Kapitel)
 ```
 
 ---
 
-## 📦 Alle Repositories
+## 📦 Code-Repositories
 
-### 🏗️ KERN-SYSTEM
+### 🏗️ Kern-System
 
-| Repo | Layer | Beschreibung | Status |
-|------|-------|-------------|--------|
-| [a-townchain-os](https://github.com/A-TownChain-Okosystems/a-townchain-os) | L2–L4 | **Haupt-Repo** — KAI-OS Core, Blockchain, KI, P2P | 🔄 Active |
-| [shivaos-kernel](https://github.com/A-TownChain-Okosystems/shivaos-kernel) | L2 | Proprietäres Microkernel-OS (ATS-1000) | 🔄 Active |
-| [atcnet](https://github.com/A-TownChain-Okosystems/atcnet) | L5 | P2P-Netzwerk-Stack (Kademlia DHT + GossipSub) | 🔄 Active |
-| [atc-gateway](https://github.com/A-TownChain-Okosystems/atc-gateway) | L7 | API-Gateway Port 4000 (Auth, RateLimit, Sig-Verify) | 🔄 Active |
-| [atclang](https://github.com/A-TownChain-Okosystems/atclang) | L2–L4 | ATCLang v0.2.0 — Proprietäre Programmiersprache | 🔄 Active |
+| Repo | Layer | Branch | Beschreibung |
+|------|-------|--------|-------------|
+| [a-townchain-os](https://github.com/A-TownChain-Okosystems/a-townchain-os) | `L2–L4` | `feature/kai-os-integration` | **Haupt-Repo** — KAI-OS Core, Orchestrator, AI |
+| [shivaos-kernel](https://github.com/A-TownChain-Okosystems/shivaos-kernel) | `L2` | `main` | Microkernel, IPC, ATCFS, Consensus |
+| [atcnet](https://github.com/A-TownChain-Okosystems/atcnet) | `L5` | `main` | P2P Stack, Kademlia DHT, Bootstrap |
+| [atc-gateway](https://github.com/A-TownChain-Okosystems/atc-gateway) | `L7` | `main` | API Gateway :4000, Circuit-Breaker |
+| [atclang](https://github.com/A-TownChain-Okosystems/atclang) | `L2–L4` | `main` | Proprietäre Sprache v0.3.0 |
 
-### 📜 SMART CONTRACTS & STANDARDS
+### 📜 Contracts & Standards
 
-| Repo | Layer | Beschreibung | Status |
-|------|-------|-------------|--------|
-| [atc-contracts](https://github.com/A-TownChain-Okosystems/atc-contracts) | L4, L11 | ATC-8300 Token, ATC-9000 NFT, ATC-9900 DAO | 🔄 Active |
-| [atc-standards](https://github.com/A-TownChain-Okosystems/atc-standards) | L0 | ATC-0001–0008 + ATS-1000–1007 Protokoll-Standards | 📋 Stable |
-| [atownchain-whitepaper](https://github.com/A-TownChain-Okosystems/atownchain-whitepaper) | L0 | Offizielles Whitepaper v2.1.0 | 📄 Published |
+| Repo | Layer | Beschreibung |
+|------|-------|-------------|
+| [atc-contracts](https://github.com/A-TownChain-Okosystems/atc-contracts) | `L4/L11` | ATC-8300 Token, ATC-9000 NFT, ATC-9900 DAO, Bridge |
+| [atc-standards](https://github.com/A-TownChain-Okosystems/atc-standards) | `L0` | ATC-0001–0009 + ATS-1000–1007 |
+| [atownchain-whitepaper](https://github.com/A-TownChain-Okosystems/atownchain-whitepaper) | `L0` | Whitepaper v2.1.0 |
 
-### 🎮 GAMING & NFT
+### 🎮 Gaming & Business
 
-| Repo | Layer | Beschreibung | Status |
-|------|-------|-------------|--------|
-| [shivamon](https://github.com/A-TownChain-Okosystems/shivamon) | L12 | Shivamon NFT — Battle, Breeding, Marketplace (ATC-9000) | 🔄 Active |
-| [franchise-factory](https://github.com/A-TownChain-Okosystems/franchise-factory) | L10, L8 | Business-DAO — Smart Contracts, Governance, Deployment | 🔄 Active |
+| Repo | Layer | Beschreibung |
+|------|-------|-------------|
+| [shivamon](https://github.com/A-TownChain-Okosystems/shivamon) | `L12` | Battle Engine, Breeding, Marketplace |
+| [franchise-factory](https://github.com/A-TownChain-Okosystems/franchise-factory) | `L10/L8` | Business DAO, Vault, Revenue-Share |
+| [atc-ui](https://github.com/A-TownChain-Okosystems/atc-ui) | `L10` | Neon Dashboard (Wallet, Explorer, AI) |
 
-### 🖥️ FRONTEND
+---
 
-| Repo | Layer | Beschreibung | Status |
-|------|-------|-------------|--------|
-| [atc-ui](https://github.com/A-TownChain-Okosystems/atc-ui) | L10 | Neon Dashboard — Wallet, Chain Explorer, Gemini AI | 🔄 Active |
+## 📚 Dokumentations-Repositories
 
-### 📚 DOKUMENTATION (Wiki-Repos)
-
-| Repo | Zu | Beschreibung |
-|------|-----|-------------|
-| [kai-os-wiki](https://github.com/ShivaCoreDev/kai-os-wiki) | KAI-OS | **Master-Wiki** v1.3.3-beta · 31 Kapitel · 9.167 Zeilen |
-| [a-townchain-os-wiki](https://github.com/A-TownChain-Okosystems/a-townchain-os-wiki) | a-townchain-os | Gesamt-Architektur, Quickstart, Roadmap |
-| [shivaos-kernel-wiki](https://github.com/A-TownChain-Okosystems/shivaos-kernel-wiki) | shivaos-kernel | Kernel-Architektur, IPC, ATCFS, Consensus |
-| [atcnet-wiki](https://github.com/A-TownChain-Okosystems/atcnet-wiki) | atcnet | P2P-Protokoll, DHT, Nachrichtenformat |
-| [atc-gateway-wiki](https://github.com/A-TownChain-Okosystems/atc-gateway-wiki) | atc-gateway | Routen, Auth, Rate-Limiting, Deployment |
-| [atclang-wiki](https://github.com/A-TownChain-Okosystems/atclang-wiki) | atclang | Sprachspezifikation, VM-Opcodes, Stdlib |
-| [atc-contracts-wiki](https://github.com/A-TownChain-Okosystems/atc-contracts-wiki) | atc-contracts | Smart Contract API, ABI, Security |
-| [atc-standards-wiki](https://github.com/A-TownChain-Okosystems/atc-standards-wiki) | atc-standards | Vollständige Protokoll-Referenz |
-| [shivamon-wiki](https://github.com/A-TownChain-Okosystems/shivamon-wiki) | shivamon | NFT-Specs, Battle-System, Breeding |
-| [atc-ui-wiki](https://github.com/A-TownChain-Okosystems/atc-ui-wiki) | atc-ui | Frontend-Architektur, Design-System |
-| [franchise-factory-wiki](https://github.com/A-TownChain-Okosystems/franchise-factory-wiki) | franchise-factory | Business-Dokumentation |
+| Wiki | Dokumentiert | Layer |
+|------|-------------|-------|
+| [kai-os-wiki](https://github.com/ShivaCoreDev/kai-os-wiki) | **Gesamtes Ökosystem** (31 Kapitel) | L0–L12 |
+| [a-townchain-os-wiki](https://github.com/A-TownChain-Okosystems/a-townchain-os-wiki) | a-townchain-os | L2–L4 |
+| [shivaos-kernel-wiki](https://github.com/A-TownChain-Okosystems/shivaos-kernel-wiki) | shivaos-kernel | L2 |
+| [atcnet-wiki](https://github.com/A-TownChain-Okosystems/atcnet-wiki) | atcnet | L5 |
+| [atc-gateway-wiki](https://github.com/A-TownChain-Okosystems/atc-gateway-wiki) | atc-gateway | L7 |
+| [atclang-wiki](https://github.com/A-TownChain-Okosystems/atclang-wiki) | atclang | L2–L4 |
+| [atc-contracts-wiki](https://github.com/A-TownChain-Okosystems/atc-contracts-wiki) | atc-contracts | L4/L11 |
+| [shivamon-wiki](https://github.com/A-TownChain-Okosystems/shivamon-wiki) | shivamon | L12 |
+| [franchise-factory-wiki](https://github.com/A-TownChain-Okosystems/franchise-factory-wiki) | franchise-factory | L10/L8 |
+| [atc-ui-wiki](https://github.com/A-TownChain-Okosystems/atc-ui-wiki) | atc-ui | L10 |
+| [atc-standards-wiki](https://github.com/A-TownChain-Okosystems/atc-standards-wiki) | atc-standards | L0 |
 
 ---
 
@@ -90,41 +86,34 @@
 atownchain-whitepaper
        │
        ▼
-atc-standards ──────────────────────────────────────────┐
-       │                                                 │
-       ▼                                                 │
-a-townchain-os (Core)                                    │
-  ├── shivaos-kernel  (L2 — Kernel)                      │
-  ├── atcnet          (L5 — P2P-Netz)                    │
-  ├── atc-gateway     (L7 — API)                         │
-  ├── atclang         (L2–L4 — Sprache)                  │
-  └── atc-contracts   (L4/L11 — Contracts)               │
-         ├── shivamon     (L12 — Gaming NFT)              │
-         └── franchise-factory (L10/L8 — Business DAO)   │
-                └── atc-ui   (L10 — Frontend)            │
-                                                         │
-kai-os-wiki ←── dokumentiert alle obigen ───────────────┘
+atc-standards (L0) ──────────────────────────────────┐
+       │                                              │
+       ▼                                              │
+atclang (L2–L4) ─────────────────┐                   │
+       │                         │                   │
+       ▼                         ▼                   │
+shivaos-kernel (L2)         atc-contracts (L4/L11)    │
+       │                         │    │               │
+       ▼                         │    │               │
+atcnet (L5)                      │    │               │
+       │                         │    │               │
+       ▼                         ▼    ▼               │
+a-townchain-os (L2–L4) ◄─────────     │               │
+       │                              │               │
+       ▼                              ▼               │
+atc-gateway (L7) ◄──────────────────── │               │
+       │                              │               │
+       ├──────────────────────────────┤               │
+       ▼                              ▼               │
+atc-ui (L10)                    shivamon (L12)         │
+franchise-factory (L10/L8)      marketplace            │
+       │                              │               │
+       └──────────────────────────────┘               │
+              ↑                                       │
+              └── alle nutzen atc-standards (L0) ─────┘
+
+kai-os-wiki ←── dokumentiert das gesamte Ökosystem
 ```
-
----
-
-## 🏷️ Standards-Mapping (KAI-OS Layer → Repo)
-
-| KAI-OS Layer | Standard | Repo |
-|-------------|----------|------|
-| L0 Security | ATSEC-1000–5000, ATAUTH-1000 | atc-standards |
-| L1 Hardware | ATPHY-1000–4000, ATIOT-1000–4000 | shivaos-kernel |
-| L2 Kernel | ATK-1000–4000 | shivaos-kernel |
-| L3 AI/KI | ATS-1000–6000, ATKG-1000–4000 | a-townchain-os |
-| L4 Blockchain | ATC-1000–7000 | a-townchain-os |
-| L5 Network | ATN-1000–4000, ATCOM-1000–5000 | atcnet |
-| L6 Storage | ATD-1000–5000 | shivaos-kernel |
-| L7 API | ATOPS-1000–4000, ATOBS-1000–1200 | atc-gateway |
-| L8 Governance | ATG-1000–4000, ATJ-1000–4000 | atc-contracts |
-| L9 Agents | ATA-1000–4000, ATAI-1000–4000 | a-townchain-os |
-| L10 dApps | ATMARKET-1000–1300, ATSOC-1000–4000 | atc-ui, shivamon |
-| L11 DeFi | ATF-1000–4000, ATE-1000–5000 | atc-contracts |
-| L12 Gamification | ATM-1000–5000, ATEDU-1000–4000 | shivamon |
 
 ---
 
@@ -134,39 +123,57 @@ kai-os-wiki ←── dokumentiert alle obigen ───────────
 # 1. Haupt-Repo klonen
 git clone https://github.com/A-TownChain-Okosystems/a-townchain-os.git
 cd a-townchain-os
+git checkout feature/kai-os-integration
 
-# 2. Abhängigkeiten installieren
-pip install -r backend/requirements.txt
-pip install -r gateway/requirements.txt
+# 2. Gesamtes Ökosystem starten (Docker)
+cp .env.example .env
+docker-compose up -d
 
-# 3. Gateway starten
-python gateway/main.py
+# 3. Status prüfen
+curl http://localhost:4000/health
 
-# 4. Backend starten
-python backend/main.py
-
-# 5. Dokumentation
-open https://github.com/ShivaCoreDev/kai-os-wiki
+# 4. Tests ausführen
+pip install -r requirements.txt
+python3 tests/test_poh.py
+python3 tests/test_did.py
+python3 tests/test_orchestrator.py
 ```
+
+**Services nach dem Start:**
+| Service | URL | Beschreibung |
+|---------|-----|-------------|
+| Frontend | http://localhost:3000 | Neon Dashboard |
+| Gateway | http://localhost:4000 | API Gateway |
+| Backend | http://localhost:5000 | REST API |
+| Bootstrap | udp://localhost:4001 | P2P Discovery |
+| Postgres | localhost:5432 | Datenbank |
+| Prometheus | http://localhost:9090 | Monitoring |
 
 ---
 
-## 📊 Projekt-Status
+## 📊 Projekt-Status (Stand: 2026-06-09)
 
 | Metrik | Wert |
 |--------|------|
-| Gesamt-Repos | 23 |
-| Code-Repos | 11 |
-| Wiki-Repos | 11 |
-| Whitepaper | 1 |
+| Repositories gesamt | 23 (11 Code + 11 Wiki + 1 Whitepaper) |
 | ATX-Module dokumentiert | 186 |
-| KAI-OS Wiki (Kapitel) | 31 |
-| KAI-OS Wiki (Zeilen) | 9.167 |
-| Sprints (gesamt) | 26 |
+| KAI-OS Wiki Kapitel | 31 |
+| Tests (grün) | 19/19 ✅ |
+| Kritische Blocker gelöst | 4 (ATC-1000, ATN-1000, ATS-1000, ATAUTH-1000) |
 | Aktueller Sprint | 2.1–2.2 |
-| MK1-Gate ETA | ~5 Tage |
+| MK1-Gate ETA | ~4 Tage |
+| Version | v2.0.0 |
 
 ---
 
-*Maintained by [@ShivaCoreDev](https://github.com/ShivaCoreDev) · A-TownChain-Okosystems*
-*Auto-generated via Aurora AI · Stand: 2026-06-09*
+## 🏷️ GitHub Topics (alle Repos)
+
+Alle Repos sind mit konsistenten Topics versehen:
+`a-townchain` · `kai-os` · `blockchain` · `ai` · `layer-spezifisch`
+
+→ [A-TownChain-Okosystems Organisation](https://github.com/A-TownChain-Okosystems)
+
+---
+
+*Maintained by [@ShivaCoreDev](https://github.com/ShivaCoreDev) · [A-TownChain-Okosystems](https://github.com/A-TownChain-Okosystems)*
+*Automatisch synchronisiert durch Aurora AI · Stand: 2026-06-09*
