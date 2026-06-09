@@ -1,137 +1,93 @@
-# KAI-OS Wiki — v1.3.3-beta
-
-> Dezentrales KI-gesteuertes Betriebssystem auf Blockchain-Basis
-> Stand: 2026-06-09 | Lizenz: Apache 2.0 | Auto-Sync aktiv
+# 📖 KAI-OS Wiki — A-TownChain OS Dokumentation
+**Version:** 2.1.0 | **Stand:** 09.06.2026 | **Sync:** Automatisch aus GitHub
 
 ---
 
-## Status & Berichte
+## Was ist A-TownChain OS?
 
-| Datei | Inhalt |
-|-------|--------|
-| [STATUS.md](./STATUS.md) | Live-Projektstatus, Traffic, Issue-Uebersicht |
-| [PERFORMANCE_REPORT.md](./PERFORMANCE_REPORT.md) | Architektur & Performance-Analyse |
-| [FIXES.md](./FIXES.md) | Bug-Fixes Status & Anwendung |
-| [TODO.md](./TODO.md) | Master-Aufgabenliste |
+A-TownChain OS ist ein vollständig proprietäres, dezentrales KI-Blockchain-Betriebssystem. Es kombiniert:
+- **ShivaOS** — Proprietäres Betriebssystem (kein POSIX-Klon)
+- **ShivaConsensus** — Hybrid PoH+PoS+PoW
+- **ATCLang** — Proprietäre Smart-Contract-Sprache
+- **Gemini AI** — Integrierter KI-Agent
+- **Shivamon** — NFT-Gaming-Ökosystem
+
+**Repository:** https://github.com/A-TownChain-Okosystems/a-townchain-os
+**Dateien:** 156 | **Python:** 99 | **Solidity:** 4 | **ATCLang:** 1
 
 ---
 
-## Architektur & Dokumentation
-
-| Datei | Inhalt |
-|-------|--------|
-| [docs/kai-os-wiki.md](./docs/kai-os-wiki.md) | **Hauptwiki** — 8.429 Zeilen, 31 Kapitel |
-| [docs/KAI_INTEGRATION.md](./docs/KAI_INTEGRATION.md) | KAI-OS Integration Guide |
-| [docs/MIGRATION_MAP.md](./docs/MIGRATION_MAP.md) | Python -> Substrate Migration |
-| [docs/ROADMAP_COMPLETENESS_AUDIT.md](./docs/ROADMAP_COMPLETENESS_AUDIT.md) | **Vollstaendigkeits-Audit** — Luecken, Fehler, Erweiterungen |
+## 📋 Dokumentations-Index
 
 ### Architektur
+| Dokument | Beschreibung | Stand |
+|----------|-------------|-------|
+| [CONSENSUS.md](docs/architecture/CONSENSUS.md) | ShivaConsensus PoH+PoS+PoW | ✅ Aktuell |
+| [SHIVAOS_KERNEL.md](docs/architecture/SHIVAOS_KERNEL.md) | ShivaOS Kernel, Prozesse, IPC | ✅ Neu |
+| [ATCNET_P2P.md](docs/architecture/ATCNET_P2P.md) | P2P Stack, Kademlia DHT | ✅ Neu |
+| [ATCFS.md](docs/architecture/ATCFS.md) | ATCFS dezentrales Dateisystem | ✅ Neu |
+| [GATEWAY.md](docs/architecture/GATEWAY.md) | API Gateway, Middleware, Routing | ✅ Aktuell |
+| [WALLET_KEYGEN.md](docs/architecture/WALLET_KEYGEN.md) | ECDSA Wallet + Key Generation | ✅ Aktuell |
+| [TESTNET.md](docs/architecture/TESTNET.md) | Testnet-Setup und Multi-Node | 🔨 In Progress |
 
-| Datei | Inhalt |
-|-------|--------|
-| [docs/architecture/CONSENSUS.md](./docs/architecture/CONSENSUS.md) | Konsens-Architektur (PoH + PoS + PoI) |
-| [docs/architecture/GATEWAY.md](./docs/architecture/GATEWAY.md) | API-Gateway (Port 4000) |
-| [docs/architecture/TESTNET.md](./docs/architecture/TESTNET.md) | Testnet Setup & Betrieb |
-| [docs/architecture/WALLET_KEYGEN.md](./docs/architecture/WALLET_KEYGEN.md) | Wallet & Key-Generation |
+### KI & AI
+| Dokument | Beschreibung | Stand |
+|----------|-------------|-------|
+| [GEMINI_INTEGRATION.md](docs/ai/GEMINI_INTEGRATION.md) | Gemini AI BYOK-Integration | ✅ Neu |
+| [AI_SAFETY.md](docs/ai/AI_SAFETY.md) | KI-Sicherheitsrichtlinien | ✅ Vorhanden |
+| [LLM_ROUTER.md](docs/ai/LLM_ROUTER.md) | LLM-Routing-Logik | ✅ Vorhanden |
 
----
+### Smart Contracts & Standards
+| Dokument | Beschreibung | Stand |
+|----------|-------------|-------|
+| [ATC_TOKEN_STANDARD.md](docs/contracts/ATC_TOKEN_STANDARD.md) | ATC-8300/9000/9900 | ✅ Aktuell |
+| [SHIVAMON_NFT_CONTRACT.md](docs/contracts/SHIVAMON_NFT_CONTRACT.md) | Shivamon NFT vollständig | ✅ Vorhanden |
+| [ATC_STANDARDS.md](docs/standards/ATC_STANDARDS.md) | ATC-0001–0008 Protokoll | ✅ Vorhanden |
+| [ATS_STANDARDS.md](docs/standards/ATS_STANDARDS.md) | ATS-1000–1007 ShivaOS | ✅ Vorhanden |
 
-## Blockchain-Integration (NEU)
+### ATCLang
+| Dokument | Beschreibung | Stand |
+|----------|-------------|-------|
+| [ATCLANG_SPEC_FULL.md](docs/atclang/ATCLANG_SPEC_FULL.md) | Vollständige Sprachspezifikation | ✅ Aktuell |
 
-| Datei | Inhalt |
-|-------|--------|
-| [docs/blockchain/SOLANA_INTEGRATION.md](./docs/blockchain/SOLANA_INTEGRATION.md) | **Kap. 32** — Anchor, SPL-Token, Shivamon NFT, Wormhole Bridge |
-| [docs/blockchain/ETHEREUM_INTEGRATION.md](./docs/blockchain/ETHEREUM_INTEGRATION.md) | **Kap. 33** — Frontier-Pallet, Solidity Suite (ATCToken.sol, ShivamonNFT.sol), Hardhat, MetaMask |
-
----
-
-## KI-Dokumentation (NEU)
-
-| Datei | Inhalt |
-|-------|--------|
-| [docs/ai/LLM_ROUTER.md](./docs/ai/LLM_ROUTER.md) | **Kap. 35** — LLM-Router, Model-Registry on-chain, IPFS-Download |
-| [docs/ai/AI_SAFETY.md](./docs/ai/AI_SAFETY.md) | **Kap. 38** — Constitutional AI, Kill-Switch, Alignment-Score, Audit-Trail |
-
----
-
-## Roadmap
-
-| Datei | Inhalt |
-|-------|--------|
-| [docs/roadmap/ROADMAP_EXTENDED.md](./docs/roadmap/ROADMAP_EXTENDED.md) | **Erweitert** — Sprint 2.9-4.8, Meilensteine MK5-MK8 (Solana, ETH, AI Safety) |
-
----
-
-## Standards
-
-| Datei | Inhalt |
-|-------|--------|
-| [docs/standards/ATC_ECOSYSTEM_STANDARDS.md](./docs/standards/ATC_ECOSYSTEM_STANDARDS.md) | Vollstaendige Oekosystem-Standards (ATC-001/8300/9000/9900 + ATS-001-008) |
-| [docs/standards/ATC_STANDARDS.md](./docs/standards/ATC_STANDARDS.md) | ATC Token Standards |
-| [docs/standards/ATS_STANDARDS.md](./docs/standards/ATS_STANDARDS.md) | ATS Technische Standards |
+### Roadmap & Issues
+| Dokument | Beschreibung | Stand |
+|----------|-------------|-------|
+| [ROADMAP.md](docs/ROADMAP.md) | Vollständige Roadmap | ✅ Vorhanden |
+| [OPEN_ISSUES_MASTER.md](docs/issues/OPEN_ISSUES_MASTER.md) | Alle Issues | ✅ Vorhanden |
+| [PROJECT_STATUS.md](docs/PROJECT_STATUS.md) | Aktueller Projektstatus | ✅ Neu |
+| [ROADMAP_v2.md](docs/ROADMAP_v2.md) | Roadmap v2 mit Issue-Status | ✅ Neu |
 
 ---
 
-## Smart Contracts
+## 🗺️ Schnell-Übersicht: v2.1.0 Status
 
-| Datei | Inhalt |
-|-------|--------|
-| [docs/contracts/SHIVAMON_NFT_CONTRACT.md](./docs/contracts/SHIVAMON_NFT_CONTRACT.md) | Shivamon NFT Contract (Ink!) |
-| [docs/contracts/ATC_TOKEN_STANDARD.md](./docs/contracts/ATC_TOKEN_STANDARD.md) | ATC Token Contract |
+| Issue | Titel | Status |
+|-------|-------|--------|
+| #1 | Smart Contracts (ATC-8300) | ✅ DONE |
+| #2 | Gemini AI Integration | ✅ DONE |
+| #6 | ECDSA Signatures | ✅ DONE |
+| #14 | Bootstrap Node P2P | ✅ DONE |
+| #3 | Shivamon Battle UI | 🔴 OPEN |
+| #4 | NFT Persistenz SQLite | 🔴 OPEN |
+| #8 | Multi-Node Testnet | 🔴 OPEN |
+| #20 | API Gateway Tests | 🔨 IN PROGRESS |
 
----
-
-## Issues & To-Dos
-
-| Datei | Inhalt |
-|-------|--------|
-| [docs/issues/OPEN_ISSUES_MASTER.md](./docs/issues/OPEN_ISSUES_MASTER.md) | Alle offenen Issues + Sub-Tasks |
-| [docs/issues/](./docs/issues/) | Issue-Dokumentation nach Nummer (ISSUE_01-ISSUE_20) |
-
----
-
-## Source-Code Spiegel (A-TownChain OS)
-
-| Verzeichnis | Inhalt |
-|-------------|--------|
-| [code/shivaos/](./code/shivaos/) | ShivaOS Kernel, Consensus, P2P (atcnet), Filesystem (atcfs) |
-| [code/blockchain/](./code/blockchain/) | Consensus (PoH/PoS/PoW/Hybrid), Nodes, Wallet, Contracts |
-| [code/gateway/](./code/gateway/) | API-Gateway + 4 Middleware-Dateien |
-| [code/core/](./code/core/) | Kernel, Event Bus, AI Kernel, KAI CLI |
-| [code/backend/](./code/backend/) | API-Server, alle Routes, DB, Wallet |
-| [code/atclang/](./code/atclang/) | ATCLang Lexer, Parser, VM, Compiler, REPL |
-| [code/tests/](./code/tests/) | 7 Test-Dateien |
-| [code/config/](./code/config/) | settings.json, kai_config.toml |
-| [code/.github/workflows/](./code/.github/workflows/) | 4 CI/CD Workflows |
+**v2.1.0 Fortschritt: 4/8 (50%)**
 
 ---
 
-## Architektur (L0-L12 NFT-Stack)
+## 🏗️ Proprietäre Standards
 
-| Layer | Komponente | Status | Kapitel |
-|-------|-----------|--------|---------|
-| L0 | Security (S1-S6) | Implementiert | 25 |
-| L1 | Hardware | Geplant | 24 |
-| L2 | Micro-Kernel (Rust) | In Migration | 24 |
-| L3 | KI-Modul (pallet-ai-registry) | Implementiert | 24.3 |
-| L4 | Blockchain (pallet-poh + GRANDPA) | Implementiert | 4 |
-| L5 | P2P-Netzwerk (libp2p) | In Migration | 2.4 |
-| L6 | Storage (IPFS + ATCFS) | In Migration | 2.5 |
-| L7 | API & CLI | Implementiert | 8 |
-| L8 | Governance (DAO) | Implementiert | 19 |
-| L9 | Agent-Registry (pallet-agent-registry) | Implementiert | 10 |
-| L10 | dApp-Oekosystem | Geplant | 5 |
-| L11 | DeFi (AMM, Lending, Oracle) | Geplant | 26 |
-| L12 | Gamification (Shivamon, Battle) | Teilweise | 27 |
+| Standard | Typ | Status |
+|----------|-----|--------|
+| ATC-0001–0008 | Blockchain-Protokoll | ✅ |
+| ATC-8300 | Fungible Token | ✅ Implementiert |
+| ATC-9000 | NFT (Shivamon) | ✅ Implementiert |
+| ATC-9900 | Governance DAO | 🔨 In Development |
+| ATS-1000–1007 | ShivaOS Kernel/Stack | ✅ |
 
 ---
 
-## Links
-
-- [A-TownChain OS Repo](https://github.com/A-TownChain-Okosystems/a-townchain-os)
-- [Notion Roadmap](https://app.notion.com/p/373b826db85c8125ba83f04995191bf0)
-- [Google Sheet Dashboard](https://docs.google.com/spreadsheets/d/1s8fl7u6Rr5bM0Rc49BJy5_kJp4NrUIffo4Mb3UGfPtY/edit)
-
----
-
-*Letzte Aktualisierung: 2026-06-09 | Auto-Sync: Superagent (KAI-OS Agent)*
+> *Automatisch synchronisiert von GitHub — A-TownChain-Okosystems/a-townchain-os*
+> *Letzter Sync: 09.06.2026 | Aurora (KAI-OS Agent)*
