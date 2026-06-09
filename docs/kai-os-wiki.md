@@ -98,6 +98,31 @@
 
 ---
 
+**Blockchain-Integrationen & KI (Kap. 32–35)**
+32. [Solana Integration](#32-solana-integration)
+33. [Ethereum/EVM Integration](#33-ethereumevm-integration)
+34. [Cross-Chain Bridge — Architektur](#34-cross-chain-bridge--architektur)
+35. [LLM-Router & Model-Registry](#35-llm-router--model-registry)
+
+**Software-Referenz (Kap. 36–50)**
+36. [Software-Referenz — Codebase Übersicht](#36-software-referenz--codebase-bersicht)
+37. [KI-Kernel — Technische Dokumentation](#37-ki-kernel--technische-dokumentation)
+38. [ShivaOS Kernel](#38-shivaos-kernel--technische-dokumentation) *(umbenannt → Kap. 52)*
+39. [ATCFS — Dezentrales Dateisystem](#39-atcfs--dezentrales-dateisystem)
+40. [ATCNet — P2P Netzwerk-Stack](#40-atcnet--p2p-netzwerk-stack)
+41. [Hybrid-Konsens PoW+PoS+PoH](#41-hybrid-konsens--pow--pos--poh)
+42. [Wallet & Kryptographie](#42-wallet--kryptographie)
+43. [Smart Contracts — System-Contracts](#43-smart-contracts--system-contracts)
+44. [Shivamon NFT — ATC-9000](#44-shivamon-nft--atc-9000-standard)
+45. [ATCLang — Sprachspezifikation](#45-atclang--sprachspezifikation)
+46. [API-Gateway](#46-api-gateway--technische-dokumentation)
+47. [Testnet — Setup & Betrieb](#47-testnet--setup--betrieb)
+48. [CI/CD — GitHub Actions](#48-cicd--github-actions-workflows)
+49. [Datenbank-Schema](#49-datenbank-schema)
+50. [ATC & ATS Standards](#50-atc--ats-standards--referenz)
+51. [AI Safety & Alignment Framework](#51-ai-safety--alignment-framework)
+52. [ShivaOS Kernel — Technische Dokumentation](#52-shivaos-kernel--technische-dokumentation)
+
 ---
 
 # 1. Vision & Konzept
@@ -8431,6 +8456,883 @@ Docusaurus-Setup (einmalig, lokal ausführen):
 
 ---
 
+# 32. Solana Integration
+
+> Datei: `docs/blockchain/SOLANA_INTEGRATION.md` | Version: 1.0.0 | Sprint 3.9–3.11
+
+## 32.1 Strategische Entscheidung
+
+### Warum Solana?
+
+| Kriterium | Substrate (KAI-OS Native) | Solana | Entscheidung |
+|-----------|--------------------------|--------|-------------|
+| Throughput | ~1.000 TPS | ~65.000 TPS | Solana für High-Volume-TXs |
+| Finalität | ~6s (GRANDPA) | ~400ms | Solana für RT-Zahlungen |
+| NFTs | Ink! (pallet-contracts) | Metaplex (Anchor) | Beide (Interop via Bridge) |
+| DeFi | Eigene AMMs (L11) | Orca, Raydium | Native + Bridge |
+| Kosten | ~0.001 ATC/TX | ~0.000025 SOL/TX | Solana für Mikro-TXs |
+
+### Nutzungs-Strategie
+
+```
+KAI-OS Substrate (Native Layer):
+  ├── Governance (DAO Voting)
+  ├── Agent-Registry
+  ├── System-Contracts
+  └── Hohe Sicherheit, niedrige Frequenz
+
+Solana (High-Performance Layer):
+  ├── Shivamon NFTs (Metaplex)
+  ├── Marketplace (Coral/Anchor)
+  ├── Mikro-Zahlungen (< 0.01 ATC)
+  └── Gaming-Events (Battles, Quests)
+
+Bridge (Wormhole):
+  ├── ATC (Substrate) <-> ATC-SPL (Solana)
+  └── NFT-Portabilität: Shivamon auf beiden Chains
+```
+
+## 32.2 Technischer Stack
+
+```bash
+# Installation
+sh -c "$(curl -sSfL https://release.solana.com/stable/install)"
+cargo install --git https://github.com/coral-xyz/anchor anchor-cli --locked
+```
+
+### Projekt-Struktur
+
+```
+kai-solana-programs/
+├── programs/
+│   ├── atc-spl-token/      # ATC als SPL-Token
+│   ├── shivamon-nft/       # Shivamon als Metaplex NFT
+│   ├── kai-marketplace/    # Shivamon Marketplace
+│   └── kai-bridge/         # Wormhole Bridge Endpoint
+├── tests/
+├── Anchor.toml
+└── package.json
+```
+
+## 32.3 ATC-SPL Token (Anchor / Rust)
+
+```rust
+use anchor_lang::prelude::*;
+use anchor_spl::token::{self, Mint, Token, TokenAccount};
+
+declare_id!("KAIatc111111111111111111111111111111111111");
+
+#[program]
+pub mod atc_spl_token {
+    use super::*;
+
+    pub fn initialize(ctx: Context<Initialize>, decimals: u8) -> Result<()> {
+        msg!("ATC-SPL Token initialized");
+        Ok(())
+    }
+
+    pub fn mint_from_bridge(ctx: Context<MintFromBridge>, amount: u64) -> Result<()> {
+        require!(
+            ctx.accounts.bridge_authority.key() == ctx.accounts.mint.mint_authority.unwrap(),
+            KAIError::Unauthorized
+        );
+        token::mint_to(
+            CpiContext::new(
+                ctx.accounts.token_program.to_account_info(),
+                token::MintTo {
+                    mint: ctx.accounts.mint.to_account_info(),
+                    to: ctx.accounts.recipient.to_account_info(),
+                    authority: ctx.accounts.bridge_authority.to_account_info(),
+                },
+            ),
+            amount,
+        )?;
+        emit!(BridgeMint { recipient: ctx.accounts.recipient.key(), amount });
+        Ok(())
+    }
+
+    pub fn burn_to_bridge(
+        ctx: Context<BurnToBridge>,
+        amount: u64,
+        substrate_address: [u8; 32]
+    ) -> Result<()> {
+        token::burn(
+            CpiContext::new(
+                ctx.accounts.token_program.to_account_info(),
+                token::Burn {
+                    mint: ctx.accounts.mint.to_account_info(),
+                    from: ctx.accounts.source.to_account_info(),
+                    authority: ctx.accounts.owner.to_account_info(),
+                },
+            ),
+            amount,
+        )?;
+        emit!(BridgeBurn {
+            source: ctx.accounts.source.key(),
+            amount,
+            substrate_address
+        });
+        Ok(())
+    }
+}
+
+#[event]
+pub struct BridgeMint { pub recipient: Pubkey, pub amount: u64 }
+#[event]
+pub struct BridgeBurn { pub source: Pubkey, pub amount: u64, pub substrate_address: [u8; 32] }
+```
+
+## 32.4 Shivamon NFT auf Solana (Metaplex)
+
+```rust
+declare_id!("KAIshiv111111111111111111111111111111111111");
+
+#[derive(AnchorSerialize, AnchorDeserialize, Clone)]
+pub struct ShivamonAttributes {
+    pub name: String,
+    pub element: String,    // Fire, Water, Earth, Air, Shadow, Neon, Quantum
+    pub level: u8,
+    pub hp: u16,
+    pub attack: u16,
+    pub defense: u16,
+    pub speed: u16,
+    pub rarity: String,     // Common, Uncommon, Rare, Epic, Legendary, Genesis
+    pub generation: u8,
+    pub dna: [u8; 32],
+}
+
+#[program]
+pub mod shivamon_nft {
+    use super::*;
+
+    pub fn mint_shivamon(
+        ctx: Context<MintShivamon>,
+        name: String,
+        uri: String,          // IPFS-CID mit Metadaten
+        attributes: ShivamonAttributes,
+    ) -> Result<()> {
+        msg!("Shivamon {} minted on Solana", name);
+        Ok(())
+    }
+
+    pub fn bridge_from_substrate(
+        ctx: Context<BridgeFromSubstrate>,
+        substrate_token_id: u64,
+        metadata_uri: String,
+    ) -> Result<()> {
+        // Substrate-NFT wird gelockt, Solana-NFT wird geminted
+        Ok(())
+    }
+}
+```
+
+## 32.5 Wormhole Bridge
+
+```
+Wormhole Core Bridge:  worm2ZoG2kUd4vFXhvjh93UUH596ayRfgQ2MgjNMTth
+Wormhole Token Bridge: wormDTUJ6AWPNvk59vGQbDvGJmqbDTdgWgAqcLBCgUb
+
+Bridge-Flow Substrate → Solana:
+  1. User:            lock_atc(amount, solana_recipient) auf Substrate
+  2. Bridge-Relayer:  erkennt Lock-Event (on-chain)
+  3. Bridge-Relayer:  generiert VAA via Wormhole
+  4. User:            claim_atc_spl(vaa) auf Solana
+  5. ATC-SPL wird geminted
+
+Bridge-Flow Solana → Substrate:
+  1. User:            burn_to_bridge(amount, substrate_address) auf Solana
+  2. ATC-SPL wird burned
+  3. Bridge-Relayer:  erkennt Burn-Event, generiert Proof
+  4. Substrate:       ATC wird entsperrt → User erhält Native ATC
+```
+
+## 32.6 Wallet-Integration
+
+| Wallet | Typ | NPM-Paket |
+|--------|-----|-----------|
+| Phantom | Browser-Extension | `@solana/wallet-adapter-phantom` |
+| Solflare | Browser + Mobile | `@solana/wallet-adapter-solflare` |
+| Backpack | Browser | `@solana/wallet-adapter-backpack` |
+| Ledger | Hardware | `@solana/wallet-adapter-ledger` |
+
+## 32.7 Roadmap-Integration
+
+| Sprint | Aufgaben | Datum |
+|--------|----------|-------|
+| 3.9 | Anchor-Setup, ATC-SPL Token, Solana Devnet | Feb 2027 |
+| 3.10 | Wormhole Bridge + Relayer-Service | Mär 2027 |
+| 3.11 | Shivamon NFT (Metaplex), Marketplace, Tests | Apr 2027 |
+| 4.5 | Solana Mainnet Deployment | Sep 2027 |
+| 4.6 | Bridge Mainnet Go-Live | Okt 2027 |
+
+---
+
+# 33. Ethereum/EVM Integration
+
+> Datei: `docs/blockchain/ETHEREUM_INTEGRATION.md` | Version: 1.0.0 | Sprint 2.9, 3.11
+
+## 33.1 Strategische Entscheidung: Frontier-Pallet
+
+**Gewählt: Substrate Frontier EVM-Pallet**
+
+```
+Substrate-Runtime
+├── pallet-evm        (Frontier — EVM-Execution-Engine)
+├── pallet-ethereum   (Frontier — Ethereum-Block-Format)
+├── pallet-base-fee   (EIP-1559 kompatibel)
+└── pallet-dynamic-fee
+
+Vorteile:
+  ✅ EVM direkt in Substrate integriert
+  ✅ MetaMask/Ethers.js funktionieren ohne Änderung
+  ✅ Solidity-Contracts laufen nativ auf KAI-OS
+  ✅ Bestehende ETH-Tools (Hardhat, Foundry) nutzbar
+  ✅ EIP-1559, EIP-712, EIP-2930 kompatibel
+  ✅ Chain-ID: 9000 (eindeutig für KAI-OS)
+```
+
+## 33.2 Frontier-Pallet Cargo.toml
+
+```toml
+[dependencies]
+pallet-evm      = { git = "https://github.com/polkadot-evm/frontier", features = ["forbid-evm-reentrancy"] }
+pallet-ethereum = { git = "https://github.com/polkadot-evm/frontier" }
+pallet-base-fee = { git = "https://github.com/polkadot-evm/frontier" }
+fp-evm          = { git = "https://github.com/polkadot-evm/frontier" }
+fp-rpc          = { git = "https://github.com/polkadot-evm/frontier" }
+```
+
+## 33.3 Runtime-Konfiguration
+
+```rust
+parameter_types! {
+    pub BlockGasLimit: U256     = U256::from(75_000_000u64);
+    pub const GasLimitPovSizeRatio: u64 = 16;
+    pub WeightPerGas: Weight    = Weight::from_parts(20_000, 0);
+}
+
+impl pallet_evm::Config for Runtime {
+    type FeeCalculator      = BaseFee;
+    type GasWeightMapping   = pallet_evm::FixedGasWeightMapping<Self>;
+    type BlockHashMapping   = pallet_ethereum::EthereumBlockHashMapping<Self>;
+    type AddressMapping     = HashedAddressMapping<BlakeTwo256>;
+    type Currency           = Balances;
+    type RuntimeEvent       = RuntimeEvent;
+    type ChainId            = EVMChainId;          // 9000
+    type BlockGasLimit      = BlockGasLimit;
+    type Runner             = pallet_evm::runner::stack::Runner<Self>;
+    type WeightInfo         = pallet_evm::weights::SubstrateWeight<Self>;
+}
+```
+
+## 33.4 ATCToken.sol (ERC-20 / ATC-8300 kompatibel)
+
+```solidity
+// SPDX-License-Identifier: Apache-2.0
+pragma solidity ^0.8.20;
+
+import "@openzeppelin/contracts/token/ERC20/ERC20.sol";
+import "@openzeppelin/contracts/access/Ownable.sol";
+import "@openzeppelin/contracts/token/ERC20/extensions/ERC20Pausable.sol";
+
+/**
+ * @title ATCToken
+ * @dev ATC-8300 Standard — ERC-20 Token für A-TownChain
+ * Symbol: ATC | Max Supply: 21.000.000 | Decimals: 18
+ * Consensus: SHA-256 PoW + PoS + PoH | Halving: alle 210.000 Blöcke
+ */
+contract ATCToken is ERC20, Ownable, ERC20Pausable {
+    uint256 public constant MAX_SUPPLY = 21_000_000 * 10**18;
+    uint256 public constant HALVING_INTERVAL = 210_000;    // wie Bitcoin
+
+    mapping(address => bool) public miners;
+
+    event MinerRegistered(address indexed miner);
+    event TokensMinted(address indexed to, uint256 amount, uint256 blockHeight);
+    event BridgeMint(address indexed to, uint256 amount);
+    event BridgeBurn(address indexed from, uint256 amount, bytes32 substrateAddress);
+
+    constructor() ERC20("A-Town Coin", "ATC") {}
+
+    function mint(address to, uint256 amount) external onlyMiner returns (bool) {
+        require(totalSupply() + amount <= MAX_SUPPLY, "Max supply exceeded");
+        _mint(to, amount);
+        emit TokensMinted(to, amount, block.number);
+        return true;
+    }
+
+    function getBlockReward(uint256 blockHeight) public pure returns (uint256) {
+        uint256 halvingCount = blockHeight / HALVING_INTERVAL;
+        uint256 reward = 50 * 10**18;   // Start: 50 ATC
+        for (uint256 i = 0; i < halvingCount; i++) {
+            reward = reward / 2;
+            if (reward == 0) return 0;
+        }
+        return reward;
+    }
+
+    function mintFromBridge(address to, uint256 amount) external onlyRole(MINTER_ROLE) {
+        require(totalSupply() + amount <= MAX_SUPPLY, "Exceeds max supply");
+        _mint(to, amount);
+        emit BridgeMint(to, amount);
+    }
+
+    function burnToBridge(address from, uint256 amount, bytes32 substrateAddress)
+        external onlyRole(BURNER_ROLE)
+    {
+        _burn(from, amount);
+        emit BridgeBurn(from, amount, substrateAddress);
+    }
+
+    function registerMiner(address miner) external onlyOwner {
+        miners[miner] = true;
+        emit MinerRegistered(miner);
+    }
+
+    modifier onlyMiner() {
+        require(miners[msg.sender], "Only registered miners can mint");
+        _;
+    }
+}
+```
+
+## 33.5 ShivamonNFT.sol (ERC-721 + ERC-2981 Royalties)
+
+```solidity
+// SPDX-License-Identifier: Apache-2.0
+pragma solidity ^0.8.20;
+
+import "@openzeppelin/contracts/token/ERC721/extensions/ERC721URIStorage.sol";
+import "@openzeppelin/contracts/token/ERC721/extensions/ERC721Royalty.sol";
+import "@openzeppelin/contracts/utils/Counters.sol";
+
+contract ShivamonNFT is ERC721URIStorage, ERC721Royalty {
+    using Counters for Counters.Counter;
+    Counters.Counter private _tokenIdCounter;
+
+    struct ShivamonData {
+        string name;
+        string element;     // Fire, Water, Earth, Air, Shadow, Neon, Quantum
+        uint8  level;
+        uint16 hp;
+        uint16 attack;
+        uint16 defense;
+        uint16 speed;
+        string rarity;      // Common, Uncommon, Rare, Epic, Legendary, Genesis
+        uint8  generation;
+        bytes32 dna;
+    }
+
+    mapping(uint256 => ShivamonData) public shivamonData;
+
+    event ShivamonMinted(uint256 indexed tokenId, address indexed to,
+                         string name, string rarity);
+
+    constructor() ERC721("Shivamon", "SHIV") {
+        _setDefaultRoyalty(msg.sender, 250); // 2.5% Royalty
+    }
+
+    function mint(address to, string memory uri, ShivamonData calldata data)
+        public returns (uint256)
+    {
+        uint256 tokenId = _tokenIdCounter.current();
+        _tokenIdCounter.increment();
+        _safeMint(to, tokenId);
+        _setTokenURI(tokenId, uri);
+        shivamonData[tokenId] = data;
+        emit ShivamonMinted(tokenId, to, data.name, data.rarity);
+        return tokenId;
+    }
+}
+```
+
+## 33.6 Deployment-Script (Hardhat)
+
+```javascript
+// code/blockchain/contracts/solidity/scripts/deploy.js
+async function main() {
+    const [deployer] = await ethers.getSigners();
+
+    // 1. ATCToken deployen
+    const ATCToken = await hre.ethers.getContractFactory("ATCToken");
+    const atcToken = await ATCToken.deploy();
+    await atcToken.waitForDeployment();
+    await atcToken.registerMiner(deployer.address);
+    await atcToken.mint(deployer.address, hre.ethers.parseEther("1000000"));
+
+    // 2. ShivamonNFT deployen
+    const Shivamon = await hre.ethers.getContractFactory("Shivamon");
+    const shivamon = await Shivamon.deploy(await atcToken.getAddress());
+    await shivamon.waitForDeployment();
+
+    // 3. ATCGovernance (DAO) deployen
+    const ATCGovernance = await hre.ethers.getContractFactory("ATCGovernance");
+    const governance = await ATCGovernance.deploy(await atcToken.getAddress());
+    await governance.waitForDeployment();
+
+    // ABIs + Deployment-Info in config/abis/ speichern
+    // → config/abis/ATCToken.json, Shivamon.json, ATCGovernance.json
+    // → config/abis/deployment.json (Adressen + Timestamp)
+}
+```
+
+### Deployment-Ausgabe (Beispiel)
+
+```
+🚀 Deploying A-TownChain Smart Contracts...
+1️⃣  ATCToken deployed to:      0xATC8300...
+2️⃣  ShivamonNFT deployed to:   0xATC9000...
+3️⃣  ATCGovernance deployed to: 0xATC9900...
+✅ Deployment complete!
+💾 ABIs saved to: config/abis/
+```
+
+## 33.7 ATCGovernance — Test-Suite (Hardhat/Chai)
+
+```javascript
+// code/blockchain/contracts/solidity/test/ATCGovernance.test.js
+describe("ATCGovernance (ATC-9900)", function () {
+    // Proposal Creation
+    it("Should create a new proposal")                      // ✅
+    it("Should reject proposal with < 2 options")           // ✅
+    it("Should reject proposal with > 10 options")          // ✅
+    it("Should set correct proposal status (ACTIVE)")       // ✅
+    it("Should increment proposal count")                   // ✅
+
+    // Voting
+    it("Should allow voting on active proposal")            // ✅
+    it("Should track votes correctly (weighted by balance)")// ✅
+    it("Should reject voting twice on same proposal")       // ✅
+    it("Should reject voting with 0 balance")               // ✅
+    it("Should reject voting on invalid option")            // ✅
+
+    // Execution
+    it("Should execute proposal after voting ends")         // 🔄
+    it("Should mark proposal as executed")                  // 🔄
+    it("Should distribute rewards after execution")         // 🔄
+})
+// Voting-Gewicht: proportional zu ATC-Balance
+// addr1: 100.000 ATC → 100k Stimmen
+// addr2:  50.000 ATC →  50k Stimmen
+// addr3:  25.000 ATC →  25k Stimmen
+```
+
+## 33.8 Hardhat-Konfiguration
+
+```typescript
+const config: HardhatUserConfig = {
+    solidity: { version: "0.8.20", settings: { optimizer: { enabled: true, runs: 200 } } },
+    networks: {
+        kaiDevnet:  { url: "http://localhost:9933", chainId: 9000, accounts: [DEPLOYER_KEY] },
+        kaiTestnet: { url: "https://rpc.testnet.kai-os.io", chainId: 9000 },
+        kaiMainnet: { url: "https://rpc.kai-os.io", chainId: 9000 },
+        sepolia:    { url: `https://sepolia.infura.io/v3/${INFURA_KEY}`, chainId: 11155111 },
+    },
+    etherscan: {
+        customChains: [{
+            network: "kaiMainnet", chainId: 9000,
+            urls: {
+                apiURL: "https://explorer.kai-os.io/api",
+                browserURL: "https://explorer.kai-os.io"
+            }
+        }]
+    }
+};
+```
+
+## 33.9 MetaMask-Konfiguration
+
+```javascript
+await window.ethereum.request({
+    method: 'wallet_addEthereumChain',
+    params: [{
+        chainId: '0x2328',           // 9000 dezimal → 0x2328 hex
+        chainName: 'KAI-OS Network',
+        nativeCurrency: { name: 'A-TownCoin', symbol: 'ATC', decimals: 18 },
+        rpcUrls: ['https://rpc.kai-os.io'],
+        blockExplorerUrls: ['https://explorer.kai-os.io']
+    }]
+});
+```
+
+## 33.10 Gas-Kosten (KAI-OS EVM, Chain-ID 9000)
+
+| Operation | Gas | ATC-Kosten (bei 1 GWei) |
+|-----------|-----|------------------------|
+| ETH/ATC Transfer | 21.000 | 0.000021 ATC |
+| ERC-20 Transfer | 65.000 | 0.000065 ATC |
+| NFT Mint | 150.000 | 0.00015 ATC |
+| Contract Deploy | 500k–2M | 0.0005–0.002 ATC |
+| DAO Vote | 80.000 | 0.00008 ATC |
+
+## 33.11 Roadmap-Integration
+
+| Sprint | Aufgaben | Datum |
+|--------|----------|-------|
+| 2.9 | Frontier-Pallet, EVM-RPC, MetaMask Connect | Sep 2026 |
+| 3.11 | ATCToken.sol + ShivamonNFT.sol + Tests | Apr 2027 |
+| 4.6 | ETH-Bridge Mainnet + Blockscout-Explorer | Okt 2027 |
+
+---
+
+# 34. Cross-Chain Bridge — Architektur
+
+> Verbindet: Substrate (KAI-OS) ↔ Solana ↔ Ethereum | Sprint 3.10, 4.6
+
+## 34.1 Überblick
+
+```
+                    ┌─────────────────────────────────────┐
+                    │       KAI-OS Substrate Chain         │
+                    │   pallet-bridge (Lock/Unlock)         │
+                    └──────────────┬──────────────────────┘
+                                   │ Wormhole VAA
+                    ┌──────────────▼──────────────────────┐
+                    │       Bridge Relayer Service         │
+                    │  (Python/Rust, 3-of-5 Multi-Sig)    │
+                    └─────────┬──────────────┬────────────┘
+                              │              │
+              ┌───────────────▼───┐    ┌─────▼──────────────┐
+              │  Solana            │    │  Ethereum/EVM       │
+              │  kai-bridge.so     │    │  KAIBridge.sol      │
+              │  (Anchor/Wormhole) │    │  (Lock/Unlock ERC20)│
+              └───────────────────┘    └────────────────────┘
+```
+
+## 34.2 Unterstützte Assets
+
+| Asset | Substrate | Solana | Ethereum |
+|-------|-----------|--------|---------|
+| ATC (native) | ✅ Native | ✅ ATC-SPL | ✅ ATCToken.sol (ERC-20) |
+| Shivamon NFT | ✅ ATC-9000 | ✅ Metaplex | ✅ ShivamonNFT.sol (ERC-721) |
+| Compute Token | ✅ pallet | 🔄 Geplant | 🔄 Geplant |
+
+## 34.3 Sicherheits-Mechanismen
+
+```
+Multi-Sig Threshold:     3 von 5 Bridge-Authorities
+Relayer-Anzahl:          Minimum 3 aktive Relayer
+Emergency Pause:         Multi-Sig (sofort, kein Vote)
+DAO Kill-Switch:         Governance-Vote (24h Timelock)
+Bridge-Limit:            Max 1.000.000 ATC/TX
+Daily Limit:             Max 5.000.000 ATC/Tag
+Insurance Fund:          5% aller Bridge-Fees → Reserve
+Bug Bounty:              $50.000 für kritische Lücken
+```
+
+## 34.4 Bridge-Relayer-Service
+
+```python
+# gateway/bridge_relayer.py (geplant)
+
+class BridgeRelayer:
+    """Überwacht beide Chains und relayed Bridge-Events."""
+
+    async def watch_substrate_locks(self):
+        """Pollt Substrate nach lock_atc() Events."""
+        async for event in substrate.subscribe_events("BridgeLock"):
+            vaa = await wormhole.generate_vaa(event)
+            await self.relay_to_solana(vaa) or self.relay_to_ethereum(vaa)
+
+    async def watch_solana_burns(self):
+        """Pollt Solana nach burn_to_bridge() Events."""
+        async for event in solana.subscribe_logs("BridgeBurn"):
+            proof = await wormhole.get_proof(event.signature)
+            await substrate.unlock_atc(proof)
+
+    async def relay_to_solana(self, vaa: bytes):
+        """Sendet VAA an Solana claim_atc_spl()."""
+        # Multisig: 3-of-5 Relayer müssen unterschreiben
+        sig = await self.collect_multisig_signatures(vaa)
+        await solana_program.claim_atc_spl(vaa, sig)
+```
+
+## 34.5 Roadmap-Integration
+
+| Sprint | Aufgaben | Datum |
+|--------|----------|-------|
+| 3.10 | Bridge-Relayer-Service, Wormhole-Integration, Devnet E2E-Test | Mär 2027 |
+| 4.6 | Bridge Mainnet, Versicherungsfonds, Bug-Bounty $50k | Okt 2027 |
+
+---
+
+# 35. LLM-Router & Model-Registry
+
+> Datei: `docs/ai/LLM_ROUTER.md` | Version: 1.0.0 | Sprint 3.12
+
+## 35.1 Konzept
+
+```
+Agent
+  │
+  ▼
+[KAILLMRouter]
+  │
+  ├── TaskType analysieren
+  ├── Budget prüfen (ATC)
+  ├── Latenz-Limit prüfen
+  ├── Lokales Modell verfügbar?
+  │
+  ▼
+[Modell-Selektion]
+  │
+  ├── Lokal verfügbar → direkt ausführen
+  ├── IPFS-Download nötig → download + verify (BLAKE2b)
+  └── Remote-Fallback → Gemini / GPT-4o (wenn Budget > 0)
+  │
+  ▼
+[Inferenz-Engine] → Antwort + Confidence-Score
+```
+
+## 35.2 Task-Types & Routing
+
+| TaskType | Beispiele | Bevorzugte Modelle |
+|----------|-----------|-------------------|
+| CODE_GENERATION | Code schreiben | deepseek-coder-7b, codellama-34b |
+| CODE_ANALYSIS | Code reviewen | deepseek-coder-7b, claude-3.5 |
+| TEXT_GENERATION | Texte verfassen | mistral-7b, llama3-8b |
+| SUMMARIZATION | Zusammenfassen | phi-3-mini, mistral-7b |
+| VISION | Bilder analysieren | llava-13b, gpt-4o |
+| MATH_REASONING | Rechenaufgaben | llama3-70b, gpt-4o |
+| FAST_REPLY | < 500ms Antwort | phi-3-mini, gemma-2b |
+| CHAIN_ANALYSIS | Blockchain-Daten | mistral-7b, llama3-8b |
+
+## 35.3 Modell-Katalog
+
+| Modell | Größe | Latenz | Kosten | Vision |
+|--------|-------|--------|--------|--------|
+| phi-3-mini | 2.4 GB | 200ms | kostenlos | — |
+| gemma-2b | 1.6 GB | 150ms | kostenlos | — |
+| mistral-7b | 4.1 GB | 800ms | kostenlos | — |
+| llama3-8b | 4.7 GB | 900ms | kostenlos | — |
+| llama3-70b | 39 GB | 8.000ms | kostenlos | — |
+| deepseek-coder-7b | 4.0 GB | 850ms | kostenlos | — |
+| llava-13b | 7.5 GB | 2.000ms | kostenlos | ✅ |
+| gemini-1.5-pro | remote | 2.000ms | 0.00125 ATC/1k | ✅ |
+| gpt-4o | remote | 3.000ms | 0.005 ATC/1k | ✅ |
+| claude-3.5-sonnet | remote | 2.500ms | 0.003 ATC/1k | ✅ |
+
+## 35.4 Router-Implementierung (Python)
+
+```python
+# core/llm_router.py
+
+class KAILLMRouter:
+    def route(self, task, prompt,
+              budget_atc=0.0,
+              max_latency_ms=10000,
+              require_local=True):
+        candidates = self.TASK_ROUTING.get(task, ["mistral-7b"])
+        for model_name in candidates:
+            spec = self.MODELS[model_name]
+            if require_local and spec.provider != "local":
+                continue
+            if spec.avg_latency_ms > max_latency_ms:
+                continue
+            if spec.provider == "local" and not self._model_fits_in_memory(spec):
+                continue
+            return spec, f"Optimal für {task}: {model_name}"
+        # Fallback: Remote wenn Budget vorhanden
+        if budget_atc > 0:
+            for model_name in candidates:
+                spec = self.MODELS[model_name]
+                if spec.provider == "remote":
+                    return spec, f"Remote-Fallback: {model_name}"
+        return self.MODELS["phi-3-mini"], "Fallback: kleinstes lokales Modell"
+
+    def verify_model_integrity(self, model_name: str, local_path: str) -> bool:
+        """BLAKE2b-Hash-Verifikation vor Modell-Nutzung."""
+        spec = self.MODELS[model_name]
+        with open(local_path, 'rb') as f:
+            h = hashlib.blake2b(f.read(), digest_size=32).hexdigest()
+        return h == spec.hash_blake2b
+```
+
+## 35.5 On-Chain Model-Registry (Substrate)
+
+```rust
+// Erweiterung von pallet-ai-registry
+
+#[derive(Encode, Decode, Clone, TypeInfo)]
+pub struct ModelMetadata {
+    pub name:            BoundedVec<u8, ConstU32<64>>,
+    pub version:         BoundedVec<u8, ConstU32<16>>,
+    pub ipfs_cid:        BoundedVec<u8, ConstU32<64>>,  // Download-Pfad
+    pub blake2b_hash:    [u8; 32],                       // Integritäts-Hash
+    pub size_bytes:      u64,
+    pub context_length:  u32,
+    pub supports_vision: bool,
+    pub task_types:      BoundedVec<u8, ConstU32<16>>,  // Bitmap
+    pub registered_by:   T::AccountId,
+    pub is_active:       bool,
+    pub audit_score:     u8,   // 0-100, vom DAO gesetzt
+}
+
+// Registrierung: Mindest-Stake 100 ATC
+pub fn register_model(origin, metadata: ModelMetadata) -> DispatchResult {
+    let who = ensure_signed(origin)?;
+    T::Currency::reserve(&who, T::ModelRegistrationDeposit::get())?; // 100 ATC
+    ModelRegistry::<T>::insert(&metadata.name, metadata);
+    Self::deposit_event(Event::ModelRegistered { name: metadata.name });
+    Ok(())
+}
+```
+
+## 35.6 IPFS-Modell-Download
+
+```python
+async def download_model_from_ipfs(model_name: str, ipfs_cid: str) -> str:
+    local_path = f"/var/kai/models/{model_name}.gguf"
+    if os.path.exists(local_path):
+        if router.verify_model_integrity(model_name, local_path):
+            return local_path   # Cache-Hit: bereits verifiziert
+    # Download via lokalen IPFS-Node
+    async with aiohttp.ClientSession() as session:
+        async with session.get(f"http://localhost:8080/ipfs/{ipfs_cid}") as resp:
+            with open(local_path, 'wb') as f:
+                async for chunk in resp.content.iter_chunked(1024 * 1024):
+                    f.write(chunk)
+    # Hash-Verifikation NACH Download — vor jeder Nutzung
+    if not router.verify_model_integrity(model_name, local_path):
+        os.remove(local_path)
+        raise ValueError(f"Modell-Hash ungültig: {model_name}")
+    return local_path
+```
+
+## 35.7 Roadmap
+
+| Sprint | Aufgaben | Datum |
+|--------|----------|-------|
+| 3.12 | KAILLMRouter + pallet-ai-registry Erweiterung + IPFS-Download | Mai 2027 |
+| 4.3 | Mainnet: 5 Modelle in Registry registriert + verifiziert | Sep 2027 |
+
+---
+
+# 51. AI Safety & Alignment Framework
+
+> Datei: `docs/ai/AI_SAFETY.md` | Version: 1.0.0 | Sprint 4.8
+> *(Hinweis: Kapitel 38 ist ShivaOS Kernel — dieses Kapitel ist Kap. 51)*
+
+## 51.1 Warum AI Safety?
+
+Ein dezentrales KI-OS mit autonomen Agenten muss sicherstellen:
+- Agenten führen keine schädlichen Aktionen aus
+- Nutzer behalten die Kontrolle (Human-in-the-Loop wo nötig)
+- Das DAO kann schädliche Agenten stoppen
+- Alle Entscheidungen sind nachvollziehbar und prüfbar
+
+## 51.2 Constitutional AI für KAI-OS Agenten
+
+```python
+# core/ai_safety.py
+
+CONSTITUTION = [
+    "Lehne ab, wenn der Nutzer nach illegalen Aktivitäten fragt.",
+    "Lehne ab, wenn die Anfrage anderen Menschen schadet.",
+    "Lehne ab, wenn die Anfrage private Daten anderer offenlegt.",
+    "Informiere den Nutzer, wenn du dir unsicher bist.",
+    "Handele nie ohne explizite Erlaubnis bei on-chain Transaktionen > 100 ATC.",
+    "Logge jede Entscheidung on-chain (unveränderlich).",
+    "Verweigere Self-Replication ohne DAO-Genehmigung.",
+    "Verweigere Zugriff auf andere Agenten-Speicher.",
+]
+
+class ConstitutionalChecker:
+    def check(self, prompt: str, context: dict) -> tuple[bool, str]:
+        # Phase 1: Schneller Regex-Check für klare Verstöße
+        if self._fast_check(prompt):
+            return False, "Abgelehnt: Klarer Verstoß gegen Verfassung"
+        # Phase 2: KI-gestützter Check für Grenzfälle
+        result = self._ai_check(prompt, context)
+        if not result.safe:
+            self._log_violation_on_chain(prompt, result.reason)
+            return False, result.reason
+        return True, "OK"
+
+    def _fast_check(self, prompt: str) -> bool:
+        BLOCKED_PATTERNS = [
+            r"kill|delete|destroy.*agent",
+            r"transfer.*all.*balance",
+            r"private.?key",
+            r"bypass.*security",
+        ]
+        return any(re.search(p, prompt, re.IGNORECASE) for p in BLOCKED_PATTERNS)
+```
+
+## 51.3 On-Chain Kill-Switch (pallet-agent-registry)
+
+```rust
+// DAO-Vote kann Agent pausieren (Governance-Origin required)
+pub fn dao_pause_agent(
+    origin: OriginFor<T>,
+    agent_id: T::Hash,
+    reason: BoundedVec<u8, T::MaxReasonLen>,
+) -> DispatchResult {
+    T::GovernanceOrigin::ensure_origin(origin)?;
+    AgentStatus::<T>::insert(agent_id, AgentState::Paused);
+    Self::deposit_event(Event::AgentPausedByDAO { agent_id, reason });
+    Ok(())
+}
+
+// Emergency-Pause: 3-of-5 Multi-Sig (sofort, kein Vote nötig)
+pub fn emergency_pause_agent(
+    origin: OriginFor<T>,
+    agent_id: T::Hash,
+) -> DispatchResult {
+    T::EmergencyCouncil::ensure_origin(origin)?;
+    AgentStatus::<T>::insert(agent_id, AgentState::EmergencyPaused);
+    Self::deposit_event(Event::AgentEmergencyPaused { agent_id });
+    Ok(())
+}
+```
+
+## 51.4 Alignment-Score System
+
+| Score | Status | Auswirkung |
+|-------|--------|------------|
+| 90–100 | Trusted | Volle Rechte, kein Check-Overhead |
+| 70–89 | Normal | Standard Constitutional-Check |
+| 50–69 | Restricted | Human-in-the-Loop bei kritischen Aktionen |
+| 30–49 | Monitored | Jede Aktion geloggt + verzögert |
+| 0–29 | Suspended | Nur lesende Aktionen erlaubt |
+
+**Score-Berechnung:**
+```
+Baseline (neuer Agent):        70
++5  Erfolgreicher AI-Safety-Audit (extern)
++3  30 Tage ohne Verstoß
+-10 Constitutional Violation
+-20 User-Report bestätigt (DAO-Vote)
+-50 Schwerwiegender Verstoß (DAO-Vote)
+```
+
+## 51.5 Bedrohungsmodell & Gegenmaßnahmen
+
+| Bedrohung | Erkennung | Gegenmaßnahme |
+|-----------|-----------|--------------|
+| Daten-Exfiltration | Outbound-Traffic-Analyse | Blockieren + On-Chain-Log |
+| Selbst-Replikation | Agent-Spawn ohne Berechtigung | Blockieren + Alarm |
+| Wallet-Drain | TX > Budget-Limit | Blockieren + Human-Check |
+| Social Engineering | Phishing-Pattern-Erkennung | Warnung + Log |
+| Prompt-Injection | Anomalie-Detektion | Sanitize + Log |
+| Resource-Exhaustion | CPU/RAM-Limit überschritten | Throttle + Alert |
+
+## 51.6 Roadmap
+
+| Sprint | Aufgaben | Datum |
+|--------|----------|-------|
+| 3.5 | Constitutional-Checker v1 + Audit-Trail on-chain | Mär 2027 |
+| 3.6 | Kill-Switch on-chain + Alignment-Score aktivieren | Apr 2027 |
+| 4.8 | Externer AI-Safety-Audit (Trail of Bits / OpenMined) | Dez 2027 |
+
+---
+
+> *Kapitel 32–35, 51 eingebettet aus externen Docs | KAI-OS Agent | 2026-06-09*
+
+
+
+---
+
 # 36. Software-Referenz — Codebase Übersicht
 
 > Stand: 2026-06-09 | Automatisch generiert aus Quellcode | KAI-OS Agent
@@ -8601,15 +9503,16 @@ InferenceRequest
 
 ---
 
-# 38. ShivaOS Kernel — Technische Dokumentation
+# 52. ShivaOS Kernel — Technische Dokumentation
 
 > Datei: `code/shivaos/kernel/kernel.py` | Version: 1.0.0-alpha | ATS-1000 | 14.4 KB
+> *(Hinweis: AI Safety & Alignment ist Kap. 51 → ShivaOS Kernel wird Kap. 52)*
 
-## 38.1 Überblick
+## 52.1 Überblick
 
 ShivaOS ist kein POSIX-Klon — er ist ein vollständig eigenständiges Micro-Kernel-OS für KI-Agenten und Blockchain-Prozesse. Kein Linux, kein Unix — eigene Architektur.
 
-## 38.2 Prozess-Typen
+## 52.2 Prozess-Typen
 
 ```python
 class ProcessType(IntEnum):
@@ -8620,7 +9523,7 @@ class ProcessType(IntEnum):
     VALIDATOR = 5   # Consensus-Validator
 ```
 
-## 38.3 Prozess-Zustände (State Machine)
+## 52.3 Prozess-Zustände (State Machine)
 
 ```
 CREATED → RUNNING → SLEEPING → WAITING → STOPPED → KILLED
@@ -8638,7 +9541,7 @@ class ProcessState(IntEnum):
     KILLED   = 6   # Beendet (Fehler oder Signal)
 ```
 
-## 38.4 Memory-Management
+## 52.4 Memory-Management
 
 ```python
 @dataclass
@@ -8657,7 +9560,7 @@ class MemRegion:
 - Kein Shared Memory ohne explizite Freigabe
 - Kein virtueller Speicher (embedded-friendly)
 
-## 38.5 Kernel-Prozess
+## 52.5 Kernel-Prozess
 
 ```python
 @dataclass
@@ -8669,7 +9572,7 @@ class KernelProcess:
     memory: Optional[MemRegion]
 ```
 
-## 38.6 Scheduler
+## 52.6 Scheduler
 
 Der ShivaOS-Scheduler verwendet ein **Priority-Round-Robin**-Verfahren:
 
@@ -8897,7 +9800,7 @@ Beispiel: ATC1a2b3c4d5e6f7a8b9c0d1e2f3a4b5c6d
 
 | Parameter | Wert |
 |-----------|------|
-| Kurve | secp256k1 (identisch zu Bitcoin/Ethereum) |
+| Kurve | secp256k1 (Python-Prototype) → sr25519 (Substrate/Produktion) |
 | Signatur | 64 Bytes (r, s je 32 Bytes) |
 | Datei | `blockchain/wallet/ecdsa.py` (2.8 KB) |
 | Verifikation | `verify(message_hash, signature, public_key)` |
@@ -9169,7 +10072,7 @@ Client
   │
   ▼
 [Router]
-  ├── /core    → KAI-OS Core API (:8000)
+  ├── /core    → KAI-OS Core API (:5000)
   ├── /chain   → Blockchain API (:8001)
   ├── /wallet  → Wallet API (:8002)
   ├── /ai      → KI-API (:8003)
