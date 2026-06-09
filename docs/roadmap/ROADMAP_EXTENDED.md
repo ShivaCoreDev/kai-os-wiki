@@ -1,201 +1,245 @@
-# Roadmap-Erweiterung — 11 neue Sprints + 4 Meilensteine
+# 🗺️ KAI-OS / A-TownChain OS — Vollständige Roadmap
 
-> Stand: 2026-06-09 | Erweiterung der bestehenden 26 Sprints
-> Grundlage: Vollstaendigkeits-Audit (ROADMAP_COMPLETENESS_AUDIT.md)
+> Letzte Aktualisierung: 2026-06-09 | Version: v1.3.3-beta
+> Basis: 26 Basis-Sprints + 11 Erweiterungs-Sprints | 8 Meilensteine
+> Generiert von: Superagent (KAI-OS Agent)
 
 ---
 
-## Neue Sprints (Phase 2 — Erweiterung)
+## 📊 Gesamtübersicht
 
-### Sprint 2.9 — Frontier EVM-Pallet Integration (Sep 2026)
+```
+2026 Q2-Q3          2026 Q3-Q4          2027 Q1-Q2          2027 Q3+
+┌──────────────┐    ┌──────────────┐    ┌──────────────┐    ┌──────────────┐
+│   Phase 1    │→   │   Phase 2    │→   │   Phase 3    │→   │   Phase 4    │
+│  Whitepaper  │    │  Prototyp    │    │    Alpha     │    │   Mainnet    │
+│  & Forschung │    │    (MVP)     │    │              │    │              │
+│  6 Sprints   │    │  10 Sprints  │    │   5 Sprints  │    │  4+ Sprints  │
+└──────────────┘    └──────────────┘    └──────────────┘    └──────────────┘
+   ✅ Phase 1         🔄 Aktiv           ⚪ Geplant           ⚪ Geplant
+   MK0: Whitepaper   MK1→MK3            MK4: Alpha           MK5-MK8
+```
 
-**Ziel:** KAI-OS kann Solidity-Contracts ausfuehren. MetaMask verbindet sich.
+### Meilensteine Übersicht
 
-**Aufgaben:**
-- [ ] Frontier-Pallet in Substrate-Runtime einbauen (pallet-evm, pallet-ethereum, pallet-base-fee)
+| # | Meilenstein | Sprint | Datum | Status |
+|---|-------------|--------|-------|--------|
+| MK0 | Whitepaper v1.0 veröffentlicht | 1.5 | Jun 2026 | 🟡 v0.9 fertig |
+| MK1 | Node produziert Blöcke (Substrate) | 2.1 | Jul 2026 | ⚪ Geplant |
+| MK2 | KI-Inferenz on-node, Agent deployed | 2.3 | Aug 2026 | ⚪ Geplant |
+| MK3 | Multi-Node Testnet live (5 Nodes) | 2.8 | Dez 2026 | ⚪ Geplant |
+| MK4 | Alpha-Release, externer Security-Audit | 3.6 | Apr 2027 | ⚪ Geplant |
+| MK5 | Multi-Chain Live (Substrate+ETH+SOL) | 4.6 | Okt 2027 | ⚪ Geplant |
+| MK6 | AI Safety Certified (externer Audit) | 4.8 | Dez 2027 | ⚪ Geplant |
+| MK7 | 100 aktive Agenten in Registry | 4.5 | Sep 2027 | ⚪ Geplant |
+| MK8 | DeFi TVL $1M | 4.8+ | Q1 2028 | ⚪ Geplant |
+
+---
+
+## Phase 1 — Whitepaper & Forschung (Jan–Jun 2026)
+**Status: ✅ Fast abgeschlossen** | Team: 2–4 Personen
+
+| Sprint | Zeitraum | Thema | Status |
+|--------|----------|-------|--------|
+| 1.1 | Jan 2026 KW 1-2 | Tech-Stack-Entscheidung | ✅ |
+| 1.2 | Jan 2026 KW 3-4 | Architektur-Design | ✅ |
+| 1.3 | Feb 2026 KW 5-8 | Whitepaper-Entwurf | ✅ v0.9 |
+| 1.4 | Mär 2026 KW 9-10 | Wettbewerbsanalyse | ✅ |
+| 1.5 | Apr 2026 KW 11-14 | Community-Aufbau + GitHub-Launch | 🟡 In Progress |
+| 1.6 | Mai–Jun 2026 KW 15-20 | Funding & Team | 🟡 In Progress |
+
+### Sprint 1.5 — Community-Aufbau (offen)
+- [x] GitHub-Organisation, Repositories, CI/CD-Grundkonfiguration
+- [x] Discord-Server, Twitter/X, LinkedIn
+- [ ] Whitepaper v1.0 öffentlich veröffentlichen
+- [ ] 100+ GitHub-Stars, 200+ Discord-Mitglieder
+
+### Sprint 1.6 — Funding & Team (offen)
+- [ ] Web3 Foundation + Ethereum Foundation Grants beantragen
+- [ ] Seed-Investor-Gespräche (Ziel: 500k–1M €)
+- [ ] Hiring: Senior Blockchain Engineer, KI-Ingenieur, Security Engineer, DevRel
+- [ ] Rechtliche Struktur (Foundation CH/LI) + Token-Rechtsberatung
+
+---
+
+## Phase 2 — Prototyp / MVP (Jul–Dez 2026)
+**Status: 🔄 Aktiv** | Team: 5–8 Personen | Issues: #22, #14–#20, #3, #7–#13
+
+---
+
+### Sprint 2.1 — Substrate-Chain Setup (Jul 2026) `#22`
+**→ MK1: Node produziert Blöcke**
+
+- [ ] Substrate Node Template + Custom Runtime
+- [ ] Pallets: `pallet-poh`, `pallet-ai-registry`, `pallet-agent-registry`
+- [ ] ⚠️ Unit-Tests für alle Custom-Pallets (je min. 5)
+- [ ] GitHub Actions CI/CD Pipeline
+- [ ] Wiki Auto-Sync + Docusaurus Workflow
+- [ ] PR `feature/kai-os-integration` → `main` mergen
+
+---
+
+### Sprint 2.2 — P2P Netzwerk-Stack (Aug 2026) `#14 #15 #16 #17 #8 #18 #19`
+**→ Grundlage für MK3**
+
+Reihenfolge (harte Abhängigkeiten):
+```
+#14 Bootstrap Node → #15 Block Propagation → #16 Initial Sync → #17 Fork-Auflösung → #8 Multi-Node Testnet
+#18 Docker Compose  ╮  (parallel zu oben)
+#19 Node-Monitoring ╯
+```
+
+- [ ] **#14** Bootstrap Node (UDP Discovery, NodeRegistry, Heartbeat, `/peers` Endpoint)
+- [ ] **#15** Block Propagation (TCP, `broadcast_block`, `broadcast_tx`, Bloom Filter)
+- [ ] **#16** Initial Sync (`sync_from_peer`, Batch-Download, Checkpoints, Parallelisierung)
+- [ ] **#17** Fork-Auflösung (`resolve_fork`, Orphan-Pool, Reorg, 5 Unit-Test-Szenarien)
+- [ ] **#18** Docker Compose (5 Nodes: Bootstrap + Validator + Miner + 2× Full, Health-Checks)
+- [ ] **#19** Node-Monitoring Dashboard (Live-Refresh 5s, Verbindungs-Graph, Alert bei Ausfall)
+- [ ] **#8** Multi-Node Testnet: 3+ synchronisierte Nodes, E2E-TX-Test
+
+---
+
+### Sprint 2.3 — KI + Smart Contracts + Tools (Sep 2026) `#9 #12 #5 #7`
+**(parallel zu Sprint 2.2)**
+
+- [ ] **#12** Solidity Contracts: `GenesisToken.sol` *(fehlt noch!)* + Hardhat Coverage >90%
+- [ ] **#9** Governance Contract Python (`governance_contract.py`, Quorum 10%, Timelock 48h)
+- [ ] **#5** Blockchain Explorer (Block-Liste, TX-Detail, Adress-Suche, Live-Update)
+- [ ] **#7** Build System (PyInstaller EXE + AppImage, GitHub Actions Release-Build)
+
+---
+
+### Sprint 2.4 — KI-Kernel Produktiv (Sep 2026)
+**→ MK2: KI-Inferenz on-node**
+
+- [ ] `core/ai_kernel.py` Inferenz-Pipeline produktiv schalten
+- [ ] Erstes Modell lokal: `phi-3-mini` oder `gemma-2b`
+- [ ] Agent deployen und via CLI aufrufen
+- [ ] Inference-Benchmark: Latenz < 1s für FAST_REPLY Tasks
+
+---
+
+### Sprint 2.5 — Marketplace (Okt 2026) `#13`
+
+- [ ] **#13** ATC Marketplace (`list_for_sale`, `buy`, `cancel_listing`, Frontend)
+
+---
+
+### Sprint 2.6 — Storage-Layer (Okt 2026)
+**→ Grundlage für dezentrale Datei-Speicherung**
+
+- [ ] IPFS-Node in `shivaos/fs/atcfs.py` integrieren
+- [ ] FUSE-Mount: IPFS-CID als Dateipfad mountbar
+- [ ] Verschlüsselung at-rest: AES-256-GCM pro Datei
+- [ ] `atcfs_spec_v2.md` schreiben
+
+---
+
+### Sprint 2.7 — API-Gateway-Tests (Nov 2026) `#20`
+
+- [ ] **#20** Gateway-Tests: Unit + Integration + Auth + Rate-Limit + Signature
+- [ ] Coverage >80%
+
+---
+
+### Sprint 2.8 — Gaming + Battle (Dez 2026) `#11 #3`
+**→ MK3: Multi-Node Testnet live**
+
+- [ ] **#11** Shivamon Breeding (DNA-Mixing, 7-Tage-Cooldown, 100 KAI Breeding-Fee)
+- [ ] **#3** Battle UI (Animationen, HP-Bars, Battle-Log, On-Chain Event)
+
+---
+
+### Sprint 2.9 — Frontier EVM-Pallet (Sep 2026)
+**(parallel zu Sprint 2.3)**
+
+- [ ] `pallet-evm` + `pallet-ethereum` + `pallet-base-fee` in Substrate-Runtime
 - [ ] Chain-ID 9000 konfigurieren
-- [ ] EVM-RPC aktivieren (Port 9933 fuer HTTP, 9944 fuer WebSocket)
-- [ ] MetaMask-Verbindung testen (wallet_addEthereumChain)
-- [ ] Basis-ERC-20 deployen und testen
+- [ ] EVM-RPC: Port 9933 HTTP, 9944 WebSocket
+- [ ] MetaMask-Verbindung: `wallet_addEthereumChain`
+- [ ] Basis-ERC-20 deployen + testen
 - [ ] Blockscout-Explorer lokal aufsetzen
-- [ ] KAI_EVM_CHAIN_ID.md Dokumentation schreiben
-
-**Meilenstein:** MetaMask verbindet sich mit KAI-OS Devnet — erste ETH-TX on-chain
 
 ---
 
-### Sprint 2.10 — IPFS-Mounting in ATCFS (Okt 2026)
+### Sprint 2.10 — IPFS-Mounting ATCFS (Okt 2026)
 
-**Ziel:** Dezentrale Dateien sind als lokales Filesystem mountbar.
-
-**Aufgaben:**
-- [ ] IPFS-Node in shivaos/fs/atcfs.py integrieren
-- [ ] FUSE-Mount: IPFS-CID als Dateipfad mounten
-- [ ] Verschluesselung at-rest: AES-256-GCM pro Datei
-- [ ] Content-Adressierung: CID als Datei-Identifier
-- [ ] Versionierung: Jede Aenderung = neuer CID (unveraenderlich)
-- [ ] atcfs_spec_v2.md schreiben
+- [ ] IPFS-CID als Dateipfad in ATCFS mounten (FUSE)
+- [ ] Versionierung: jede Änderung = neuer CID (unveränderlich)
+- [ ] Verschlüsselung: AES-256-GCM at-rest
 
 ---
 
-## Neue Sprints (Phase 3 — Erweiterung)
+## Phase 3 — Alpha (Jan–Jun 2027)
+**Status: ⚪ Geplant** | Team: 8–15 Personen
 
-### Sprint 3.9 — Solana Anchor-Programme (Feb 2027)
+| Sprint | Datum | Thema | Abhängigkeit |
+|--------|-------|-------|-------------|
+| 3.1–3.4 | Jan–Feb 2027 | Agent-Runtime, DeFi L11 Basis, Security Audit Prep | Phase 2 ✅ |
+| 3.5 | Feb 2027 | Constitutional AI Checker v1 + Audit-Trail | #22 |
+| 3.6 | Apr 2027 | Kill-Switch on-chain + Alignment-Score | 3.5 |
+| 3.9 | Feb 2027 | Solana Anchor-Programme (ATC-SPL Token) | #22 |
+| 3.10 | Mär 2027 | Wormhole Bridge Substrate ↔ Solana | 3.9 |
+| 3.11 | Apr 2027 | Solidity Contract Suite Testnet (Hardhat >90%) | 2.9 |
+| 3.12 | Mai 2027 | LLM-Router + RAG-System | #22 |
+| 3.13 | Jun 2027 | Multi-Modal AI (Vision, Audio, Code-Execution) | 3.12 |
 
-**Ziel:** ATC-SPL Token und erste Shivamon NFTs auf Solana Devnet.
-
-**Aufgaben:**
-- [ ] Anchor-Entwicklungsumgebung einrichten
-- [ ] atc-spl-token Program implementieren (mint_from_bridge, burn_to_bridge)
-- [ ] Solana Devnet Deployment
-- [ ] Tests: Token-Transfer, Bridge-Mint, Bridge-Burn
-- [ ] Phantom-Wallet Integration im Frontend
-- [ ] docs/blockchain/SOLANA_INTEGRATION.md finalisieren
-
----
-
-### Sprint 3.10 — Wormhole Bridge Substrate <-> Solana (Mär 2027)
-
-**Ziel:** ATC fliesst zwischen Substrate und Solana.
-
-**Aufgaben:**
-- [ ] kai-bridge Anchor-Program (Wormhole-Integration)
-- [ ] Bridge-Relayer-Service implementieren (Python/Rust)
-- [ ] 3-of-5 Multi-Sig fuer Bridge-Operations
-- [ ] Devnet End-to-End Test: ATC Substrate -> ATC-SPL Solana -> Rueck-Bridge
-- [ ] Emergency-Pause-Mechanismus
-- [ ] Bridge-Monitoring Dashboard
-- [ ] Security-Review: Bridge-Logik
+**→ MK4: Alpha-Release + externer Security-Audit (Apr 2027)**
 
 ---
 
-### Sprint 3.11 — Solidity Contract Suite + Hardhat (Apr 2027)
+## Phase 4 — Mainnet (Jul 2027+)
+**Status: ⚪ Geplant** | Team: 15+ Personen
 
-**Ziel:** Vollstaendige EVM-Contract-Suite auf KAI-OS Testnet.
-
-**Aufgaben:**
-- [ ] ATCToken.sol (ERC-20) mit Bridge-Roles
-- [ ] ShivamonNFT.sol (ERC-721 + ERC-2981 Royalties)
-- [ ] KAIGovernance.sol (Governor Bravo kompatibel)
-- [ ] KAIMarketplace.sol (ERC-721 Marketplace)
-- [ ] KAIBridge.sol (Lock/Unlock fuer ETH-Bridge)
-- [ ] Hardhat-Tests: >90% Coverage
-- [ ] Deployment auf KAI-OS Testnet (Chain-ID 9000)
-- [ ] Etherscan-Verifikation (Blockscout)
+| Sprint | Datum | Thema | Meilenstein |
+|--------|-------|-------|-------------|
+| 4.5 | Sep 2027 | Solana Mainnet (ATC-SPL, Shivamon NFTs, Marketplace) | MK7: 100 Agenten |
+| 4.6 | Okt 2027 | Ethereum Bridge Mainnet + Bug-Bounty $50k | MK5: Multi-Chain |
+| 4.7 | Nov 2027 | Post-Quantum Kryptographie (Dilithium, Kyber) | — |
+| 4.8 | Dez 2027 | AI Safety Audit (Trail of Bits / OpenMined) | MK6: AI Safety |
+| 4.8+ | Q1 2028 | DeFi TVL Wachstum | MK8: $1M TVL |
 
 ---
 
-### Sprint 3.12 — LLM-Router & RAG-System (Mai 2027)
+## 🔗 Abhängigkeits-Graph
 
-**Ziel:** Agenten nutzen automatisch das beste Modell. Lokale Wissensbasis.
+```
+#22 Substrate ──────────────────────────────────────────┐
+    │                                                    │
+    ├──→ #14 Bootstrap Node                             │
+    │        └──→ #15 Block Propagation                 │
+    │                 └──→ #16 Initial Sync             │
+    │                           └──→ #17 Fork-Regel    │
+    │                                    └──→ #8 Testnet│
+    │                                                    │
+    ├──→ #20 Gateway-Tests (unabhängig, parallel)       │
+    │                                                    │
+    └──→ Sprint 2.9 EVM-Pallet ──→ Sprint 3.11 Solidity │
+                                         └──→ Sprint 4.6 ETH-Bridge
 
-**Aufgaben:**
-- [ ] KAILLMRouter implementieren (core/llm_router.py)
-- [ ] pallet-ai-registry: ModelMetadata-Storage hinzufuegen
-- [ ] IPFS-Modell-Download + BLAKE2b-Verifikation
-- [ ] RAG-System: Qdrant lokal + On-Chain-State als Kontext
-- [ ] Agent-Memory-Persistenz (IPFS + lokale Vektordatenbank)
-- [ ] 5 Modelle in lokaler Registry (phi-3-mini bis llama3-8b)
-- [ ] Tests: Router-Selektion, Modell-Verifikation
+#4 Persistenz ✅ ──→ #11 Breeding ──→ #3 Battle UI
+              └──→ #13 Marketplace
 
----
+#12 Solidity ──→ #13 Marketplace
+             └──→ Sprint 3.11 Testnet-Deployment
 
-### Sprint 3.13 — Multi-Modal AI (Jun 2027)
-
-**Ziel:** Agenten sehen Bilder, hoeren Audio, fuehren Code aus.
-
-**Aufgaben:**
-- [ ] Vision-Modul: LLaVA-1.6 Integration
-- [ ] Audio-Modul: Whisper v3 (Speech-to-Text)
-- [ ] Audio-Output: Bark (Text-to-Speech)
-- [ ] Code-Execution-Sandbox: sicheres Python-Ausfuehren (seccomp + namespace)
-- [ ] Tool-Use Framework: Agenten koennen curl, git, kai-cli aufrufen
-- [ ] Multi-Modal API: POST /v1/agents/{id}/invoke mit file_attachments
+Sprint 3.9 Solana ──→ Sprint 3.10 Wormhole ──→ Sprint 4.5 Mainnet
+```
 
 ---
 
-## Neue Sprints (Phase 4 — Erweiterung)
+## ⚡ Nächste Schritte (diese Woche)
 
-### Sprint 4.5 — Solana Mainnet Deployment (Sep 2027)
-
-**Aufgaben:**
-- [ ] ATC-SPL Token auf Solana Mainnet deployen
-- [ ] Shivamon NFT Collection auf Metaplex Mainnet
-- [ ] KAI Marketplace auf Solana Mainnet
-- [ ] Phantom/Solflare Wallet-Integration im Dashboard
-- [ ] Solana-Explorer-Integration
-- [ ] Announcement: Shivamon jetzt auf Solana!
-
----
-
-### Sprint 4.6 — Ethereum Bridge Mainnet (Okt 2027)
-
-**Aufgaben:**
-- [ ] ATCToken.sol auf Ethereum Mainnet deployen
-- [ ] Wormhole Bridge: Substrate <-> Ethereum live
-- [ ] Etherscan-Verifikation
-- [ ] Bridge-Bug-Bounty: $50k fuer kritische Schwachstellen
-- [ ] Bridge-Versicherungsfonds: 5% aller Bridge-Fees
+| Priorität | Aktion | Sprint | Aufwand |
+|-----------|--------|--------|---------|
+| 🔴 SOFORT | Issue #2 auf GitHub schließen | — | 2 min |
+| 🔴 SOFORT | `feature/bootstrap-node` mergen | 2.2 | 30 min |
+| 🔴 SOFORT | `feature/solidity-contracts` mergen | 2.3 | 30 min |
+| 🔴 SOFORT | `fix/implement-gateway-backend` mergen | 2.7 | 30 min |
+| 🔴 HIGH | Tests für `pallet-ai-registry` + `pallet-agent-registry` | 2.1 | 2h |
+| 🟡 MEDIUM | `GenesisToken.sol` erstellen (fehlt für #12) | 2.3 | 1h |
+| 🟡 MEDIUM | Breed-Cooldown: 24h → 7 Tage korrigieren | 2.8 | 15 min |
 
 ---
 
-### Sprint 4.7 — Post-Quantum Kryptographie Migration (Nov 2027)
-
-**Aufgaben:**
-- [ ] CRYSTALS-Kyber (Key Encapsulation) evaluieren
-- [ ] CRYSTALS-Dilithium (Digitale Signaturen) evaluieren
-- [ ] Hybrides Schema: Ed25519 + Dilithium parallel
-- [ ] Migration-Plan: Bestehende Keys ohne Downtime migrieren
-- [ ] Substrate-Pallet fuer PQ-Signaturen
-- [ ] Crypto-Agility: Algorithmus-Wechsel ohne Hard-Fork
-
----
-
-### Sprint 4.8 — AI Safety Audit + Alignment Certification (Dez 2027)
-
-**Aufgaben:**
-- [ ] ConstitutionalChecker v2: KI-gestuetzte Echtzeit-Analyse
-- [ ] Alignment-Score-System on-chain aktivieren
-- [ ] Kill-Switch: DAO-Vote + Emergency-Multi-Sig
-- [ ] Externer AI-Safety-Audit beauftragen (Trail of Bits / OpenMined / Redwood Research)
-- [ ] Alignment-Score > 0.95 fuer alle System-Agenten
-- [ ] Oeffentliches Transparency-Report veroeffentlichen
-
----
-
-## Neue Meilensteine
-
-### MK5 — Multi-Chain Live (Okt 2027)
-**Bedingung:** Substrate + Ethereum + Solana verbunden. ATC fliesst ueber alle drei Chains.
-**Beweis:** 100 successful Bridge-TXs ohne Fehler in 48h
-
-### MK6 — AI Safety Certified (Dez 2027)
-**Bedingung:** Externer Audit abgeschlossen. Alle System-Agenten Alignment-Score > 90.
-**Beweis:** Oeffentlicher Audit-Report + On-Chain Certification-NFT
-
-### MK7 — 100 Agenten Live (Sep 2027)
-**Bedingung:** Dezentrale Agenten-Registry > 100 aktive, verifizierte Agenten.
-**Beweis:** pallet-agent-registry: query active_agents() > 100
-
-### MK8 — DeFi TVL $1M (Q1 2028)
-**Bedingung:** Total Value Locked in L11 DeFi-Protokollen > $1.000.000.
-**Beweis:** On-chain TVL-Oracle-Messung ueber 7 Tage
-
----
-
-## Aktualisierte Meilenstein-Uebersicht (vollstaendig)
-
-| Meilenstein | Bedingung | Sprint | Geplant |
-|-------------|-----------|--------|---------|
-| MK1 | Substrate-Node produziert Bloecke | 2.1 | Jul 2026 |
-| MK2 | KI-Inferenz on-node, Agent deployed | 2.3 | Aug 2026 |
-| MK3 | Multi-Node Testnet live (5 Nodes) | 2.8 | Dez 2026 |
-| MK4 | Alpha-Release, externer Security-Audit | 3.6 | Apr 2027 |
-| MK5 | Multi-Chain Live (Substrate+ETH+SOL) | 4.6 | Okt 2027 |
-| MK6 | AI Safety Certified | 4.8 | Dez 2027 |
-| MK7 | 100 aktive Agenten in Registry | 4.5 | Sep 2027 |
-| MK8 | DeFi TVL $1M | 4.8+ | Q1 2028 |
-
----
-
-*KAI-OS Wiki — Roadmap-Erweiterung | v1.0.0 | 2026-06-09*
+*KAI-OS Roadmap v2.0 | Letzte Aktualisierung: 2026-06-09 03:00 | KAI-OS Agent*
