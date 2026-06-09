@@ -1,647 +1,335 @@
-# ATCLang — Vollständige Sprachspezifikation
-
-> Version: 0.2.0 | Stand: 2026-06-09 | KAI-OS Wiki
-> Status: Aktiv entwickelt (Sprint 2.5)
+# 📝 ATCLang — Vollständige Sprachspezifikation
+**Version:** v0.2.0-alpha | **Stand:** 09.06.2026 | **Dateien:** `atclang/`
 
 ---
 
-## 1. Übersicht
+## Überblick
 
-ATCLang ist die native Programmiersprache des A-TownChain Ökosystems. Sie ist speziell für Blockchain-Anwendungen, Smart Contracts und KI-Agenten-Interaktionen designed.
+ATCLang ist die proprietäre Programmiersprache des A-TownChain Ökosystems. Sie wurde vollständig von Grund auf entwickelt — keine Abhängigkeit von Python-Syntax, Solidity oder anderen Sprachen.
 
-### Eigenschaften
-
-| Eigenschaft | Beschreibung |
-|-------------|-------------|
-| Paradigma | Imperativ + Contract-Oriented |
-| Typsystem | Statisch typisiert |
-| Ausführung | Stack-basierte VM (ATCVM) |
-| Ziel-Plattform | A-TownChain Blockchain + KAI-OS |
-| Dateiendung | .atc |
-| Version | 0.2.0-alpha |
+**Design-Ziele:**
+- Blockchain-native: Smart Contracts als Erstklassige Sprachkonstrukte
+- Statisch typisiert mit Typ-Inferenz
+- Kein GC: deterministisches Speichermodell für on-chain Ausführung
+- Proprietäre VM: Stack-basiert, 30+ Opcodes
 
 ---
 
-## 2. Architektur der Toolchain
+## Architektur-Überblick
 
 ```
-Quellcode (.atc)
-     |
-  [Lexer]          -> Token-Stream
-     |
-  [Parser]         -> AST (Abstract Syntax Tree)
-     |
-  [Compiler]       -> Bytecode (Instruction-Liste)
-     |
-  [ATCVM]          -> Ausführung
-     |
-  [Blockchain]     -> Events + State-Änderungen on-chain
-```
-
-### Dateien
-
-| Datei | Beschreibung | Zeilen |
-|-------|-------------|--------|
-| atclang/lexer/lexer.py | Tokenizer | 272 |
-| atclang/parser/ast_nodes.py | AST-Knoten-Definitionen | 130 |
-| atclang/parser/parser.py | Recursive-Descent Parser | 376 |
-| atclang/compiler/compiler.py | Bytecode-Compiler | 455 |
-| atclang/vm/atcvm.py | Stack-VM + Opcodes | 330 |
-| atclang/repl/repl.py | Interaktive Shell | 158 |
-
----
-
-## 3. Lexer
-
-### 3.1 Keywords (51 Schlüsselwörter)
-
-```
-wallet    contract   fn        state     emit      require
-return    if         else      elif      for       while
-in        import     from      as        let       const
-pub       priv       self      caller    block     tx
-deploy    call       event     error     true      false
-null      break      continue  struct    enum      impl
-trait     new        delete    async     await     node
-consensus genesis    mint      burn      stake     unstake
-vote
-```
-
-### 3.2 Typen (22 eingebaute Typen)
-
-```
-UInt8    UInt16    UInt32    UInt64    UInt256
-Int8     Int16     Int32     Int64
-Bool     String    Address   Hash256   Bytes
-Map      List      Set       Option    Result
-ATC8300  ATC9000   ATCContract ATCWallet
-```
-
-### 3.3 Operatoren
-
-| Operator | Bedeutung |
-|----------|-----------|
-| + - * / % | Arithmetik |
-| == != < > <= >= | Vergleich |
-| && \|\| ! | Logik |
-| = | Zuweisung |
-| := | Deklaration + Zuweisung |
-| -> | Rückgabetyp |
-| :: | Namespace (ATC::Wallet::new) |
-| . | Feldzugriff |
-| @decorator | Decorator |
-
----
-
-## 4. Parser & AST
-
-### 4.1 AST-Knoten
-
-```python
-# Vollständige AST-Knoten-Liste
-
-# Programme
-Program             # Root-Knoten
-ImportStmt          # import ATC::Wallet
-
-# Deklarationen
-FunctionDef         # fn transfer(to: Address) -> Bool { ... }
-ContractDef         # contract ShivaToken : ATC-8300 { ... }
-StructDef           # struct Player { name: String, hp: UInt16 }
-EventDef            # event Transfer(from: Address, to: Address)
-StateDef            # state balance: Map<Address, UInt256>
-
-# Statements
-LetStmt             # let x: UInt256 = 100
-AssignStmt          # x = 200
-IfStmt              # if x > 0 { ... } else { ... }
-ForStmt             # for item in list { ... }
-WhileStmt           # while condition { ... }
-ReturnStmt          # return value
-EmitStmt            # emit Transfer(caller, to, amount)
-RequireStmt         # require(balance >= amount)
-ExprStmt            # Ausdruck als Statement
-
-# Expressions
-BinaryOp            # a + b, x == y
-UnaryOp             # !flag, -number
-IntLiteral          # 42, 1_000_000
-FloatLiteral        # 3.14
-StringLiteral       # "hallo"
-BoolLiteral         # true / false
-Identifier          # variablenname
-CallExpr            # fn_name(arg1, arg2)
-MethodCallExpr      # obj.method(args)
-IndexExpr           # map[key], list[0]
-FieldAccessExpr     # obj.field
-NamespacedExpr      # ATC::Wallet::new(...)
-```
-
-### 4.2 Beispiel: AST für Transfer-Funktion
-
-```
-FunctionDef(
-  name="transfer",
-  params=[("to", "Address"), ("amount", "UInt256")],
-  return_type="Bool",
-  body=[
-    RequireStmt(
-      BinaryOp(">=", IndexExpr(Identifier("balance"), Identifier("caller")), Identifier("amount"))
-    ),
-    AssignStmt(
-      IndexExpr(Identifier("balance"), Identifier("caller")),
-      BinaryOp("-", IndexExpr(...), Identifier("amount"))
-    ),
-    EmitStmt("Transfer", [Identifier("caller"), Identifier("to"), Identifier("amount")]),
-    ReturnStmt(BoolLiteral(true))
-  ]
-)
+ATCLang Quellcode (.atc)
+        │
+   [ATCLexer]          ← lexer/lexer.py (562 Zeilen, 67+ Token-Typen)
+        │
+   Token-Stream
+        │
+   [ATCParser]         ← parser/parser.py (rekursiver Descent)
+        │
+   AST (Abstract Syntax Tree)
+        │
+   [ATCCompiler]       ← compiler/compiler.py
+        │
+   Bytecode
+        │
+   [ATCVM]             ← vm/atcvm.py (886 Zeilen, Stack-basiert)
+        │
+   Ausführungsergebnis
 ```
 
 ---
 
-## 5. VM: Opcodes
+## Lexer — Token-Typen
 
-### 5.1 Alle 43 Opcodes
+**Datei:** `atclang/lexer/lexer.py` (562 Zeilen)
 
-| Gruppe | Opcode | Beschreibung |
-|--------|--------|-------------|
-| **Stack** | PUSH val | Wert auf Stack legen |
-| | POP | Oberstes Element entfernen |
-| | DUP | Stack-Top duplizieren |
-| | SWAP | Obere zwei tauschen |
-| **Arithmetik** | ADD / SUB / MUL / DIV / MOD | Grundrechenarten |
-| | NEG | Negation (-x) |
-| **Vergleich** | EQ / NEQ / LT / GT / LTE / GTE | Vergleiche (Bool-Ergebnis) |
-| **Logik** | AND / OR / NOT | Boolsche Operationen |
-| **Variablen** | LOAD name | Variable auf Stack laden |
-| | STORE name | Stack-Top in Variable speichern |
-| | LOAD_IDX | Map/List[key] laden |
-| | STORE_IDX | Map/List[key] = val setzen |
-| **Sprünge** | JUMP offset | Unbedingter Sprung |
-| | JUMP_IF offset | Sprung wenn Top == True |
-| | JUMP_NOT offset | Sprung wenn Top == False |
-| **Funktionen** | CALL name argc | Funktion aufrufen |
-| | RETURN | Rückkehr mit Stack-Top |
-| | CALL_EXT name | Externe ATC-Funktion |
-| **ATC-Spezifisch** | EMIT event argc | Blockchain-Event auslösen |
-| | REQUIRE msg | Assertion (wirft Fehler wenn false) |
-| | TRANSFER | ATC-Token transferieren |
-| | MINT | Token minten |
-| | BURN | Token burnen |
-| **Objekte** | NEW_MAP | Leere Map {} erstellen |
-| | NEW_LIST | Leere Liste [] erstellen |
-| | GET_FIELD name | obj.field laden |
-| | SET_FIELD name | obj.field = val setzen |
-| **System** | HALT | Ausführung stoppen |
-| | NOP | Keine Operation |
-| | PRINT | Debug-Ausgabe |
+### Schlüsselwörter (Keywords)
+```
+contract  fn       state    return   if       else
+elif      while    for      in       let      const
+import    from     use      pub      priv     static
+emit      require  assert   revert   self     caller
+true      false    null     new      delete   break
+continue  match    case     default  type     impl
+trait     struct   enum     mod      extern   unsafe
+```
 
-### 5.2 Gas-Kosten
+### Typen
+```
+u8   u16  u32  u64   u128  u256
+i8   i16  i32  i64   i128
+f32  f64
+bool  string  bytes  address  hash
+Map<K,V>   Vec<T>   Option<T>   Result<T,E>
+```
 
-| Opcode-Gruppe | Gas pro Aufruf |
-|---------------|----------------|
-| PUSH, POP, DUP, SWAP | 1 |
-| ADD, SUB, MUL | 3 |
-| DIV, MOD | 5 |
-| EQ, NEQ, LT, GT, LTE, GTE | 3 |
-| LOAD, STORE | 3 |
-| LOAD_IDX, STORE_IDX | 5 |
-| CALL | 50 |
-| EMIT | 100 |
-| REQUIRE | 5 |
-| MINT, BURN | 500 |
-| TRANSFER | 200 |
+### Operatoren
+```
++  -  *  /  %  **         Arithmetik
+==  !=  <  >  <=  >=      Vergleich
+&&  ||  !                 Logik
+&  |  ^  ~  <<  >>        Bitweise
+=  +=  -=  *=  /=  %=    Zuweisung
+->  =>  ::  .  ..  ...   Sonstige
+```
 
-**Gas-Limit Standard:** 1.000.000 Gas pro Transaktion
+### Literale
+```
+42          Integer
+0xFF        Hex-Integer
+3.14        Float
+"hello"     String
+b"deadbeef" Bytes
+true/false  Boolean
+0x1A2B...   Address (automatisch erkannt wenn 35 Zeichen mit ATC-Präfix)
+```
 
 ---
 
-## 6. Vollständige Syntax-Referenz
+## Parser — Grammatik
 
-### 6.1 Variablen
+**Datei:** `atclang/parser/parser.py` (rekursiver Descent)
+
+### Top-Level Konstrukte
 
 ```atclang
-// Unveränderlich
-const MAX_SUPPLY: UInt256 = 1_000_000_000
+// Contract-Deklaration
+contract TokenName : ATC-8300 {
+    state balances: Map<Address, u128>
+    state total_supply: u128 = 1_000_000
 
-// Veränderlich
-let counter: UInt32 = 0
-
-// Typen können inferiert werden
-let name = "ShivaCore"   // Typ: String
-let amount = 100         // Typ: UInt64 (default Int)
-```
-
-### 6.2 Funktionen
-
-```atclang
-// Einfache Funktion
-fn add(a: UInt256, b: UInt256) -> UInt256 {
-    return a + b
-}
-
-// Öffentliche Funktion (callable von extern)
-pub fn get_balance(addr: Address) -> UInt256 {
-    return state.balance[addr]
-}
-
-// Interne Funktion
-priv fn _validate(amount: UInt256) -> Bool {
-    require(amount > 0)
-    return true
-}
-
-// Async-Funktion (für off-chain Calls)
-async fn fetch_price(token: String) -> UInt256 {
-    // Ruft Oracle-Vertrag auf
-    return await ATC::Oracle::get_price(token)
-}
-```
-
-### 6.3 Contracts
-
-```atclang
-// Contract erbt von ATC-8300 (Fungible Token Standard)
-contract ATCToken : ATC-8300 {
-
-    // State-Variablen (persistiert on-chain)
-    state balance: Map<Address, UInt256>
-    state allowance: Map<Address, Map<Address, UInt256>>
-    state total_supply: UInt256 = 0
-
-    // Events
-    event Transfer(from: Address, to: Address, amount: UInt256)
-    event Approval(owner: Address, spender: Address, amount: UInt256)
-
-    // Konstruktor
-    fn init(initial_supply: UInt256) {
-        balance[caller] = initial_supply
-        total_supply = initial_supply
-        emit Transfer("0x0", caller, initial_supply)
-    }
-
-    pub fn transfer(to: Address, amount: UInt256) -> Bool {
-        require(balance[caller] >= amount, "Nicht genug Balance")
-        require(to != "0x0", "Ungültige Adresse")
-        balance[caller] -= amount
-        balance[to] += amount
+    fn transfer(to: Address, amount: u128) -> bool {
+        require(self.balances[caller] >= amount, "Insufficient balance")
+        self.balances[caller] -= amount
+        self.balances[to]     += amount
         emit Transfer(caller, to, amount)
         return true
     }
-
-    pub fn approve(spender: Address, amount: UInt256) -> Bool {
-        allowance[caller][spender] = amount
-        emit Approval(caller, spender, amount)
-        return true
-    }
-
-    pub fn transfer_from(from: Address, to: Address, amount: UInt256) -> Bool {
-        require(allowance[from][caller] >= amount, "Nicht genehmigt")
-        require(balance[from] >= amount, "Nicht genug Balance")
-        allowance[from][caller] -= amount
-        balance[from] -= amount
-        balance[to] += amount
-        emit Transfer(from, to, amount)
-        return true
-    }
 }
 ```
 
-### 6.4 Shivamon NFT Contract
-
 ```atclang
-contract ShivamonNFT : ATC-9000 {
+// Struct
+struct Block {
+    hash:      bytes32,
+    prev_hash: bytes32,
+    height:    u64,
+    timestamp: u64,
+}
 
-    state owners: Map<UInt256, Address>
-    state token_count: UInt256 = 0
-    state metadata: Map<UInt256, String>   // IPFS-CID
+// Enum
+enum TxStatus {
+    Pending,
+    Confirmed(u64),   // Block-Höhe
+    Failed(string),   // Fehler-Nachricht
+}
 
-    // Shivamon-spezifische Attribute
-    state stats: Map<UInt256, ShivamonStats>
-
-    struct ShivamonStats {
-        name: String
-        element: String
-        level: UInt8
-        hp: UInt16
-        attack: UInt16
-        defense: UInt16
-        speed: UInt16
-        rarity: String
-        generation: UInt8
-        dna: Hash256
-    }
-
-    event Mint(to: Address, token_id: UInt256, name: String)
-    event Transfer(from: Address, to: Address, token_id: UInt256)
-    event LevelUp(token_id: UInt256, new_level: UInt8)
-
-    pub fn mint(to: Address, name: String, element: String, ipfs_cid: String) -> UInt256 {
-        let token_id = token_count
-        token_count += 1
-        owners[token_id] = to
-        metadata[token_id] = ipfs_cid
-
-        // Basis-Stats generieren (deterministisch aus token_id)
-        stats[token_id] = ShivamonStats {
-            name: name,
-            element: element,
-            level: 1,
-            hp: 50 + (token_id % 50),
-            attack: 10 + (token_id % 30),
-            defense: 10 + (token_id % 25),
-            speed: 10 + (token_id % 20),
-            rarity: "Common",
-            generation: 1,
-            dna: ATC::Hash::blake2b(token_id)
-        }
-
-        emit Mint(to, token_id, name)
-        return token_id
-    }
-
-    pub fn transfer(to: Address, token_id: UInt256) -> Bool {
-        require(owners[token_id] == caller, "Nicht der Besitzer")
-        require(to != "0x0", "Ungültige Adresse")
-        owners[token_id] = to
-        emit Transfer(caller, to, token_id)
-        return true
-    }
+// Trait
+trait Mintable {
+    fn mint(to: Address, amount: u128) -> bool
+    fn burn(from: Address, amount: u128) -> bool
 }
 ```
 
-### 6.5 Kontrollfluss
-
+### Ausdrücke (Expressions)
 ```atclang
-// If-Else
-if balance[caller] > 1000 {
-    emit Premium(caller)
-} elif balance[caller] > 100 {
-    emit Standard(caller)
-} else {
-    emit Basic(caller)
+// Arithmetik
+let x: u64 = safe_add(100, 200)    // Overflow-safe Addition
+let y: u64 = x * 2 - 50
+
+// Conditional
+let result = if x > 100 { "big" } else { "small" }
+
+// Match
+match status {
+    TxStatus::Pending      => "waiting",
+    TxStatus::Confirmed(n) => "confirmed at block " + to_string(n),
+    TxStatus::Failed(err)  => "error: " + err,
 }
 
-// For-Schleife
-for token_id in token_list {
-    let owner = owners[token_id]
-    emit TokenInfo(token_id, owner)
-}
+// Map-Zugriff
+let bal: u128 = self.balances[addr]
+self.balances[addr] = bal + amount
 
-// While-Schleife
-let i: UInt32 = 0
-while i < 10 {
-    counter += 1
-    i += 1
-}
-
-// Break / Continue
-for item in items {
-    if item == null { continue }
-    if item == target { break }
-    process(item)
-}
-```
-
-### 6.6 Structs
-
-```atclang
-struct Player {
-    address: Address
-    name: String
-    level: UInt8
-    xp: UInt64
-    wins: UInt32
-    losses: UInt32
-}
-
-fn create_player(name: String) -> Player {
-    return Player {
-        address: caller,
-        name: name,
-        level: 1,
-        xp: 0,
-        wins: 0,
-        losses: 0
-    }
-}
-```
-
-### 6.7 Imports & Namespaces
-
-```atclang
-// Eingebaute ATC-Bibliotheken
-import ATC::Wallet
-import ATC::Math
-import ATC::Hash
-import ATC::Time
-import ATC::Oracle
-
-// Andere Contracts
-import contracts::ATCToken
-import contracts::ShivamonNFT
-
-// Verwendung
-let hash = ATC::Hash::blake2b("input")
-let timestamp = ATC::Time::now()
-let price = ATC::Oracle::get_price("ATC/USDT")
+// Methoden-Aufruf
+let h: bytes32 = sha256("data")
+require(is_valid_address(to), "Invalid address")
 ```
 
 ---
 
-## 7. Standard-Bibliothek (ATC:: Namespace)
+## VM — Virtuelle Maschine
 
-### ATC::Wallet
+**Datei:** `atclang/vm/atcvm.py` (886 Zeilen)
 
-```atclang
-ATC::Wallet::new(name: String)          -> Wallet
-ATC::Wallet::balance(addr: Address)     -> UInt256
-ATC::Wallet::transfer(to: Address, amount: UInt256) -> Bool
-ATC::Wallet::sign(data: Hash256)        -> Bytes
-ATC::Wallet::verify(sig: Bytes, data: Hash256, addr: Address) -> Bool
+Die ATCVM ist eine Stack-basierte virtuelle Maschine mit einem separaten Heap für Contract-State.
+
+### VM-Architektur
+```
+┌─────────────────────────────────────┐
+│            ATCVM                    │
+├─────────────┬───────────────────────┤
+│  Stack      │  Heap                 │
+│  (Operanden)│  (Contract-State)     │
+├─────────────┴───────────────────────┤
+│  Program Counter (PC)               │
+│  Call Stack (Funktionsaufrufe)      │
+│  Gas Counter                        │
+│  Event Log                          │
+└─────────────────────────────────────┘
 ```
 
-### ATC::Math
+### Opcode-Tabelle
 
-```atclang
-ATC::Math::min(a: UInt256, b: UInt256) -> UInt256
-ATC::Math::max(a: UInt256, b: UInt256) -> UInt256
-ATC::Math::sqrt(x: UInt256)            -> UInt256
-ATC::Math::pow(base: UInt256, exp: UInt256) -> UInt256
-ATC::Math::abs(x: Int256)              -> UInt256
+| Opcode | Wert | Beschreibung |
+|--------|------|-------------|
+| `PUSH` | 0x01 | Wert auf Stack legen |
+| `POP` | 0x02 | Obersten Wert entfernen |
+| `DUP` | 0x03 | Obersten Wert duplizieren |
+| `SWAP` | 0x04 | Obere zwei Werte tauschen |
+| `ADD` | 0x10 | Addition |
+| `SUB` | 0x11 | Subtraktion |
+| `MUL` | 0x12 | Multiplikation |
+| `DIV` | 0x13 | Division |
+| `MOD` | 0x14 | Modulo |
+| `EQ` | 0x20 | Gleichheit |
+| `NEQ` | 0x21 | Ungleichheit |
+| `LT` | 0x22 | Kleiner als |
+| `GT` | 0x23 | Größer als |
+| `AND` | 0x30 | Logisches AND |
+| `OR` | 0x31 | Logisches OR |
+| `NOT` | 0x32 | Logisches NOT |
+| `JUMP` | 0x40 | Unbedingter Sprung |
+| `JUMPI` | 0x41 | Bedingter Sprung |
+| `CALL` | 0x50 | Funktionsaufruf |
+| `RETURN` | 0x51 | Rückgabe |
+| `LOAD` | 0x60 | State laden |
+| `STORE` | 0x61 | State schreiben |
+| `SHA256` | 0x70 | Hash berechnen |
+| `EMIT` | 0x80 | Event emittieren |
+| `REQUIRE` | 0x81 | Assertion |
+| `REVERT` | 0x82 | Transaktion rückgängig |
+| `CALLER` | 0x90 | Aufrufer-Adresse |
+| `TIMESTAMP` | 0x91 | Block-Zeitstempel |
+| `BLOCKNUM` | 0x92 | Block-Höhe |
+| `STOP` | 0xFF | Ausführung beenden |
+
+### Gas-System
 ```
-
-### ATC::Hash
-
-```atclang
-ATC::Hash::blake2b(data: String)  -> Hash256
-ATC::Hash::sha256(data: String)   -> Hash256
-ATC::Hash::keccak256(data: String) -> Hash256  // EVM-kompatibel
-```
-
-### ATC::Time
-
-```atclang
-ATC::Time::now()          -> UInt64   // Unix-Timestamp
-ATC::Time::block_time()   -> UInt64   // Block-Timestamp
-ATC::Time::block_num()    -> UInt64   // Aktuelle Block-Höhe
-```
-
-### ATC::Oracle
-
-```atclang
-ATC::Oracle::get_price(pair: String) -> UInt256   // z.B. "ATC/USDT"
-ATC::Oracle::get_random(seed: Hash256) -> UInt256 // VRF-basiert
+Basis-Gas pro Transaktion: 21.000
+Zusatz pro Opcode:
+  - PUSH/POP/DUP:  3 Gas
+  - ADD/SUB/MUL:   5 Gas
+  - DIV/MOD:       8 Gas
+  - SHA256:        30 Gas
+  - LOAD/STORE:    200 Gas (State-Zugriff)
+  - CALL:          700 Gas
+  - EMIT:          375 Gas
 ```
 
 ---
 
-## 8. Fehlerbehandlung
+## Standard Library (Stdlib)
+
+**Datei:** `atclang/stdlib/atc_stdlib.py`
+
+| Funktion | Signatur | Beschreibung |
+|----------|---------|-------------|
+| `sha256` | `(s: string) -> bytes32` | SHA-256 Hash |
+| `sha3_256` | `(s: string) -> bytes32` | SHA3-256 Hash |
+| `keccak256` | `(s: string) -> bytes32` | Keccak-256 (Solidity-kompatibel) |
+| `require` | `(cond: bool, msg: string)` | Assertion mit Fehlermeldung |
+| `assert_eq` | `(a, b, msg?)` | Gleichheits-Assertion |
+| `safe_add` | `(a: u64, b: u64) -> u64` | Overflow-sichere Addition |
+| `safe_sub` | `(a: u64, b: u64) -> u64` | Underflow-sichere Subtraktion |
+| `safe_mul` | `(a: u64, b: u64) -> u64` | Overflow-sichere Multiplikation |
+| `is_valid_address` | `(addr: string) -> bool` | ATC-Adresse validieren |
+| `zero_address` | `() -> address` | Null-Adresse (ATC + 32×'0') |
+| `block_timestamp` | `() -> u64` | Aktueller Block-Zeitstempel |
+| `block_number` | `() -> u64` | Aktuelle Block-Höhe |
+| `emit` | `(name: string, data: map)` | Contract-Event senden |
+| `to_json` | `(v: any) -> string` | JSON-Serialisierung |
+| `from_json` | `(s: string) -> any` | JSON-Deserialisierung |
+
+---
+
+## Vollständiges Beispiel — ATC-8300 Counter Contract
 
 ```atclang
-// require() — wirft Fehler wenn Bedingung false
-require(amount > 0, "Betrag muss positiv sein")
-require(balance[caller] >= amount, "Nicht genug Balance")
-require(caller == owner, "Nur Owner erlaubt")
+// counter.atc — Einfacher Counter Contract
+contract Counter {
 
-// error — benannte Fehlertypen
-error InsufficientBalance(address: Address, required: UInt256)
-error Unauthorized(caller: Address)
-error InvalidAmount(amount: UInt256)
+    // State-Variablen (persistent on-chain)
+    state count:   u64   = 0
+    state owner:   Address
 
-// Fehler auslösen
-fn transfer(to: Address, amount: UInt256) -> Bool {
-    if balance[caller] < amount {
-        emit InsufficientBalance(caller, amount)
-        return false
+    // Konstruktor
+    fn init(owner_addr: Address) {
+        self.owner = owner_addr
+        emit ContractDeployed(owner_addr, block_timestamp())
     }
-    // ...
+
+    // State-mutating Funktion
+    fn increment() {
+        require(is_valid_address(caller), "Invalid caller")
+        self.count = safe_add(self.count, 1)
+        emit Incremented(caller, self.count)
+    }
+
+    fn increment_by(amount: u64) {
+        require(amount > 0, "Amount must be positive")
+        require(amount <= 1000, "Max increment: 1000")
+        self.count = safe_add(self.count, amount)
+        emit IncrementedBy(caller, amount, self.count)
+    }
+
+    fn reset() {
+        require(caller == self.owner, "Only owner can reset")
+        self.count = 0
+        emit Reset(caller)
+    }
+
+    // Read-only Funktion
+    fn get_count() -> u64 {
+        return self.count
+    }
+
+    fn get_owner() -> Address {
+        return self.owner
+    }
 }
 ```
 
 ---
 
-## 9. Was noch fehlt / Roadmap
+## REPL — Interaktive Shell
 
-### 9.1 Implementiert (v0.1.0)
-
-| Feature | Status |
-|---------|--------|
-| Lexer: alle Token-Typen | ✅ |
-| Parser: Expressions, Statements | ✅ |
-| Parser: Contract, Function | ✅ |
-| Compiler: Expressions -> Bytecode | ✅ |
-| Compiler: if/else/while/for | ✅ |
-| Compiler: Funktionen | ✅ |
-| VM: alle 43 Opcodes | ✅ |
-| VM: Gas-Metering | ✅ |
-| VM: Events (EMIT) | ✅ |
-| REPL: Interaktive Shell | ✅ |
-
-### 9.2 Fehlt / Geplant (v0.2.0 — Sprint 2.5)
-
-| Feature | Priorität | Sprint |
-|---------|-----------|--------|
-| Unit-Tests (test_atclang.py) | HOCH | 2.5 |
-| Type-Checker (statische Typen prüfen) | HOCH | 2.5 |
-| Structs im Compiler | HOCH | 2.5 |
-| Standard-Bibliothek ATC:: (Implementierung) | HOCH | 2.5 |
-| Imports zwischen Contracts | MITTEL | 2.6 |
-| Async/Await (off-chain calls) | MITTEL | 3.1 |
-| Generics (Map<K,V> zur Laufzeit) | MITTEL | 3.1 |
-| Enums mit Daten | MITTEL | 3.2 |
-| Pattern Matching (match/case) | NIEDRIG | 3.3 |
-| Closures / Lambda | NIEDRIG | 3.4 |
-| Substrate-Ink! Transpiler | HOCH | 3.5 |
-| VS Code Extension (Syntax-Highlighting) | NIEDRIG | 4.1 |
-| Language Server Protocol (LSP) | NIEDRIG | 4.2 |
-
----
-
-## 10. REPL-Verwendung
+**Datei:** `atclang/repl/repl.py`
 
 ```bash
-# ATCLang REPL starten
-python3 -m atclang.repl
+$ python -m atclang.repl
 
-ATCLang REPL v0.1.0 — Typ 'help' fuer Hilfe
-
->>> let x: UInt256 = 100
->>> let y: UInt256 = 200
->>> x + y
-300
-
->>> fn double(n: UInt256) -> UInt256 { return n * 2 }
-Funktion 'double' definiert
-
->>> double(21)
-42
-
->>> :load my_contract.atc
-Geladen: my_contract.atc
-
->>> :compile
-Kompiliert: 42 Instruktionen
-
->>> :run
-Ausfuehren...
+ATCLang REPL v0.2.0 — Tippe :help für Befehle
+ATC> let x: u64 = 42
+ATC> x * 2
+→ 84
+ATC> sha256("hello")
+→ "2cf24dba5fb0a30e26e83b2ac5b9e29e1b161e5c1fa7425e73043362938b9824"
+ATC> :load counter.atc
+Geladen: Counter (3 Funktionen)
+ATC> Counter.increment()
+→ Event: Incremented(ATC000..., 1)
+ATC> Counter.get_count()
+→ 1
+ATC> :exit
 ```
 
-### REPL-Befehle
-
+**REPL-Befehle:**
 | Befehl | Beschreibung |
 |--------|-------------|
-| :load <datei> | ATCLang-Datei laden |
-| :compile | Aktuellen Code kompilieren |
-| :run | Kompilierten Code ausführen |
-| :disasm | Bytecode anzeigen |
-| :reset | VM zurücksetzen |
-| :history | Eingabe-History anzeigen |
-| :help | Hilfe anzeigen |
-| :quit / :q | Beenden |
-
----
-
-## 11. Compiler-Pipeline Beispiel
-
-```python
-from atclang.lexer.lexer import ATCLexer
-from atclang.parser.parser import ATCParser
-from atclang.compiler.compiler import ATCCompiler
-from atclang.vm.atcvm import ATCVM
-
-source = """
-fn fib(n: UInt256) -> UInt256 {
-    if n <= 1 { return n }
-    return fib(n - 1) + fib(n - 2)
-}
-"""
-
-# 1. Lexen
-lexer = ATCLexer(source)
-tokens = lexer.tokenize()
-
-# 2. Parsen
-parser = ATCParser(tokens)
-ast = parser.parse()
-
-# 3. Kompilieren
-compiler = ATCCompiler()
-module = compiler.compile_program(ast)
-
-# 4. Ausführen
-vm = ATCVM()
-for func in module.functions.values():
-    vm.register_function(func)
-vm.globals['fib'] = lambda n: None  # placeholder
-result = vm.execute(module.main_instructions)
-
-# 5. Ergebnis
-print(f"fib(10) = {result}")  # 55
-print(f"Gas verbraucht: {vm.gas_used}")
-```
-
----
-
-*ATCLang Sprachspezifikation v0.2.0 | KAI-OS Wiki | 2026-06-09*
+| `:help` | Hilfe anzeigen |
+| `:load <datei>` | .atc Datei laden |
+| `:contracts` | Geladene Contracts auflisten |
+| `:state <contract>` | Contract-State anzeigen |
+| `:reset` | Alle State-Variablen zurücksetzen |
+| `:exit` | REPL beenden |
