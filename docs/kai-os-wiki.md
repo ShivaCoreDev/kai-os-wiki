@@ -8427,3 +8427,1009 @@ Docusaurus-Setup (einmalig, lokal ausführen):
 
 ---
 > *Nächster Auto-Sync: täglich 08:00 Uhr + alle 6h · Aurora (KAI-OS Agent)*
+
+
+---
+
+# 36. Software-Referenz — Codebase Übersicht
+
+> Stand: 2026-06-09 | Automatisch generiert aus Quellcode | KAI-OS Agent
+
+## 36.1 Repository-Struktur
+
+```
+kai-os-wiki/
+├── code/                        # Gesamter Quellcode
+│   ├── core/                    # KAI-OS Kern-Module
+│   │   ├── ai_kernel.py         # KI-Inference Engine (15.9 KB)
+│   │   ├── kai_cli.py           # CLI Haupt-Einstiegspunkt (9.2 KB)
+│   │   ├── kernel.py            # Kernel-Bootstrap (0.6 KB)
+│   │   ├── module_loader.py     # Dynamischer Modul-Loader (0.4 KB)
+│   │   └── event_bus.py         # Interner Event-Bus (0.4 KB)
+│   ├── shivaos/                 # ShivaOS Betriebssystem-Layer
+│   │   ├── kernel/kernel.py     # OS-Kernel (14.4 KB)
+│   │   ├── fs/atcfs.py          # ATCFS Dateisystem (11.4 KB)
+│   │   ├── net/atcnet.py        # ATCNet P2P-Stack (18.3 KB)
+│   │   └── consensus/           # Konsens-Algorithmen (24.8 KB)
+│   ├── blockchain/              # Blockchain-Implementierung
+│   │   ├── smart_contracts.py   # System-Smart-Contracts (24.1 KB)
+│   │   ├── smart_contract_registry.py  # Contract-Registry (1.7 KB)
+│   │   ├── atcoin/atcoin.py     # ATC-Coin Logik (5.8 KB)
+│   │   ├── consensus/           # PoW + PoS + PoH
+│   │   ├── contracts/           # Deployed Contracts
+│   │   ├── nodes/               # Node-Logik & P2P (26.9 KB)
+│   │   └── wallet/              # Wallet & ECDSA
+│   ├── atclang/                 # ATCLang Programmiersprache
+│   │   ├── lexer/lexer.py       # Tokenizer (11.1 KB)
+│   │   ├── parser/parser.py     # Recursive-Descent Parser (15.4 KB)
+│   │   ├── compiler/compiler.py # Bytecode-Compiler (18.1 KB)
+│   │   ├── vm/atcvm.py          # Stack-VM (11.5 KB)
+│   │   └── repl/repl.py         # Interaktive Shell (6.5 KB)
+│   ├── backend/                 # REST API & Datenbank
+│   │   ├── api/kai_routes.py    # KAI API Routes (11.9 KB)
+│   │   ├── api/server.py        # Flask Server (2.0 KB)
+│   │   ├── db/repository.py     # Datenbank-Repository (6.8 KB)
+│   │   ├── db/schema.sql        # SQL-Schema (2.2 KB)
+│   │   └── wallet/wallet.py     # Wallet-Backend (5.1 KB)
+│   ├── gateway/                 # API-Gateway (Port 4000)
+│   │   ├── main.py              # Gateway Factory (1.6 KB)
+│   │   ├── router.py            # Service-Router (2.1 KB)
+│   │   └── middleware/          # Auth, Rate-Limit, Logger
+│   ├── frontend/                # Web-Dashboard
+│   │   ├── index.html           # Haupt-UI (123.7 KB)
+│   │   └── bootscreen/          # Boot-Animation
+│   └── tests/                   # Test-Suite (47.6 KB total)
+│       ├── test_atclang.py      # ATCLang Tests (14.0 KB)
+│       ├── test_kai_integration.py  # Integration (8.5 KB)
+│       ├── test_gateway.py      # Gateway Tests (7.2 KB)
+│       └── test_p2p_propagation.py  # P2P Tests (4.6 KB)
+├── docs/                        # Dokumentation
+│   ├── kai-os-wiki.md           # Haupt-Wiki (291 KB, 8.400+ Zeilen)
+│   ├── atclang/                 # ATCLang Spezifikation
+│   ├── architecture/            # Architektur-Dokumente
+│   ├── blockchain/              # Blockchain-Integrationen
+│   ├── contracts/               # Contract-Dokumentation
+│   ├── standards/               # ATC + ATS Standards
+│   ├── issues/                  # Issue-Tracking Docs
+│   └── roadmap/                 # Erweiterter Roadmap
+└── patches/                     # Bug-Fix Patches
+```
+
+## 36.2 Technologie-Stack
+
+| Schicht | Technologie | Version | Dateien |
+|---------|-------------|---------|---------|
+| Sprache | Python | 3.10+ | Gesamter Backend-Code |
+| Web-Framework | Flask | 3.x | `backend/api/server.py` |
+| Blockchain | Custom A-TownChain | 2.0 | `blockchain/` |
+| Substrate | Rust (via Pallet) | 1.x | `docs/architecture/` |
+| Smart Contracts | Python + Solidity | ATC-8300/9000 | `blockchain/contracts/` |
+| Kryptographie | ECDSA (secp256k1) | — | `blockchain/wallet/ecdsa.py` |
+| Netzwerk | Custom ATCNet | ATS-1006 | `shivaos/net/atcnet.py` |
+| Dateisystem | ATCFS | ATS-1002 | `shivaos/fs/atcfs.py` |
+| KI | Lokale LLMs / Gemini | — | `core/ai_kernel.py` |
+| Container | Docker Compose | 3.8 | `patches/docker-compose.yml` |
+| CI/CD | GitHub Actions | — | `.github/workflows/` |
+| Frontend | Vanilla HTML/JS | — | `frontend/index.html` |
+| Eigene Sprache | ATCLang | 0.2.0-alpha | `atclang/` |
+
+---
+
+# 37. KI-Kernel — Technische Dokumentation
+
+> Datei: `code/core/ai_kernel.py` | Version: 1.0.0-alpha | 15.9 KB
+
+## 37.1 Überblick
+
+Der KAI-OS AI Kernel ist die Inference Engine des Systems. Er implementiert neurosymbolisches Reasoning für autonome Entscheidungen auf Basis des KAI-OS Wiki (Kap. 2.2, 3.x).
+
+## 37.2 Klassen & Datenstrukturen
+
+### InferenceMode (Enum)
+```python
+class InferenceMode(Enum):
+    LOCAL       = "local"        # Lokale Ausführung
+    DISTRIBUTED = "distributed"  # Verteilte Inferenz auf P2P-Nodes
+    HYBRID      = "hybrid"       # Automatische Auswahl je nach Last
+```
+
+### DecisionType (Enum)
+```python
+class DecisionType(Enum):
+    RESOURCE_ALLOCATION = "resource_allocation"
+    ANOMALY_DETECTION   = "anomaly_detection"
+    SCHEDULING          = "scheduling"
+    OPTIMIZATION        = "optimization"
+    GOVERNANCE          = "governance"
+    CRITICAL            = "critical"
+```
+
+### InferenceRequest (Dataclass)
+```python
+@dataclass
+class InferenceRequest:
+    request_id:    str
+    prompt:        str
+    model:         str
+    max_tokens:    int   = 2048
+    temperature:   float = 0.7
+    mode:          InferenceMode  = InferenceMode.LOCAL
+    decision_type: DecisionType   = DecisionType.OPTIMIZATION
+    timestamp:     float = None   # Auto-gesetzt auf time.time()
+```
+
+### InferenceResult (Dataclass)
+```python
+@dataclass
+class InferenceResult:
+    request_id:  str
+    output:      str
+    confidence:  float    # 0.0 – 1.0
+    latency_ms:  float
+    model_used:  str
+    mode:        InferenceMode
+    on_chain_ref: Optional[str]  # TX-Hash für XAI-Audit
+```
+
+## 37.3 Inference-Pipeline
+
+```
+InferenceRequest
+      │
+   [Mode-Check]
+      ├── LOCAL       → Lokales LLM (llama3, mistral, gemma)
+      ├── DISTRIBUTED → P2P-Node-Cluster
+      └── HYBRID      → Last < 70%? LOCAL : DISTRIBUTED
+      │
+   [DecisionType-Router]
+      ├── CRITICAL    → Konsens mit 3 unabhängigen Nodes
+      ├── GOVERNANCE  → On-Chain Logging + XAI-Audit
+      └── Andere      → Single-Node Inference
+      │
+   InferenceResult + optionaler On-Chain-Log
+```
+
+## 37.4 Unterstützte Modelle
+
+| Modell | Typ | RAM | Token/s (CPU) | Token/s (GPU) |
+|--------|-----|-----|--------------|--------------|
+| llama3-8b-q4 | LLM | 6 GB | 10 | 80 |
+| mistral-7b-q4 | LLM | 5 GB | 12 | 90 |
+| gemma-2b-q8 | LLM | 2 GB | 25 | 180 |
+| phi-3-mini | LLM | 2 GB | 30 | 200 |
+| Gemini API | Cloud | — | ~50 (latenz) | ~50 |
+
+---
+
+# 38. ShivaOS Kernel — Technische Dokumentation
+
+> Datei: `code/shivaos/kernel/kernel.py` | Version: 1.0.0-alpha | ATS-1000 | 14.4 KB
+
+## 38.1 Überblick
+
+ShivaOS ist kein POSIX-Klon — er ist ein vollständig eigenständiges Micro-Kernel-OS für KI-Agenten und Blockchain-Prozesse. Kein Linux, kein Unix — eigene Architektur.
+
+## 38.2 Prozess-Typen
+
+```python
+class ProcessType(IntEnum):
+    AGENT     = 1   # KI-Agent (autonomer Softwareagent)
+    SERVICE   = 2   # Hintergrund-Dienst
+    CONTRACT  = 3   # Smart Contract (laufend im Kontext)
+    SYSTEM    = 4   # OS-System-Prozess
+    VALIDATOR = 5   # Consensus-Validator
+```
+
+## 38.3 Prozess-Zustände (State Machine)
+
+```
+CREATED → RUNNING → SLEEPING → WAITING → STOPPED → KILLED
+              ↑          │
+              └──────────┘ (aufgeweckt)
+```
+
+```python
+class ProcessState(IntEnum):
+    CREATED  = 1   # Initialisiert, noch nicht gestartet
+    RUNNING  = 2   # Aktiv auf CPU
+    SLEEPING = 3   # Wartet auf Timer
+    WAITING  = 4   # Wartet auf I/O oder Event
+    STOPPED  = 5   # Manuell gestoppt
+    KILLED   = 6   # Beendet (Fehler oder Signal)
+```
+
+## 38.4 Memory-Management
+
+```python
+@dataclass
+class MemRegion:
+    pid:   int           # Prozess-ID des Eigentümers
+    size:  int           # Größe in Bytes
+    data:  bytearray     # Roher Speicherbereich
+    addr:  int = 0       # Basisadresse
+
+    def read(self, offset: int, length: int) -> bytes
+    def write(self, offset: int, data: bytes)
+```
+
+**Eigenschaften:**
+- Isolierter Adressraum pro Prozess
+- Kein Shared Memory ohne explizite Freigabe
+- Kein virtueller Speicher (embedded-friendly)
+
+## 38.5 Kernel-Prozess
+
+```python
+@dataclass
+class KernelProcess:
+    pid:    int
+    name:   str
+    ptype:  ProcessType
+    state:  ProcessState
+    memory: Optional[MemRegion]
+```
+
+## 38.6 Scheduler
+
+Der ShivaOS-Scheduler verwendet ein **Priority-Round-Robin**-Verfahren:
+
+| Priorität | Prozess-Typ | Zeitscheibe |
+|-----------|-------------|-------------|
+| P0 (höchste) | SYSTEM | 100 ms |
+| P1 | VALIDATOR | 80 ms |
+| P2 | CONTRACT | 50 ms |
+| P3 | SERVICE | 30 ms |
+| P4 (niedrigste) | AGENT | 20 ms |
+
+---
+
+# 39. ATCFS — Dezentrales Dateisystem
+
+> Datei: `code/shivaos/fs/atcfs.py` | Version: 1.0.0-alpha | ATS-1002 | 11.4 KB
+
+## 39.1 Überblick
+
+ATCFS ist kein IPFS-Klon — es verwendet eine eigene Content-Adressierung mit SHA3-256 und einem `atc1`-Präfix.
+
+## 39.2 Datei-Typen
+
+```python
+class FileType(IntEnum):
+    FILE     = 1   # Reguläre Datei
+    DIR      = 2   # Verzeichnis
+    SYMLINK  = 3   # Symbolischer Link
+    CONTRACT = 4   # .atcb — Smart Contract Bytecode
+```
+
+## 39.3 ATC-Dateiendungen
+
+| Endung | Bedeutung |
+|--------|-----------|
+| `.atc`  | ATCLang Quellcode |
+| `.atcb` | ATCLang Bytecode (kompiliert) |
+| `.atcm` | ATC-Modul |
+| `.atcw` | ATC-Wallet |
+| `.atcd` | ATC-Daten |
+| `.atcp` | ATC-Prozess-Image |
+
+## 39.4 Content-ID Algorithmus
+
+```python
+def atc_content_id(data: bytes) -> str:
+    """SHA3-256 mit ATCFS-Domain-Trenner"""
+    h = hashlib.sha3_256()
+    h.update(b"atcfs_v1||")   # Domain-Trenner
+    h.update(data)
+    return "atc1" + h.hexdigest()
+    # Beispiel: "atc1a3f8e2b1c4d..." (69 Zeichen)
+```
+
+**Unterschied zu IPFS:** Kein CID-Multihash-Format. Kein `Qm`-Präfix. Eigenes `atc1`-Namensraum.
+
+## 39.5 Berechtigungen
+
+```python
+class OpenMode(IntEnum):
+    READ    = 0b0001   # Lesen
+    WRITE   = 0b0010   # Schreiben
+    APPEND  = 0b0100   # Anhängen
+    EXEC    = 0b1000   # Ausführen (nur .atcb)
+```
+
+---
+
+# 40. ATCNet — P2P Netzwerk-Stack
+
+> Datei: `code/shivaos/net/atcnet.py` | Version: 1.0.0-alpha | ATS-1006 | 18.3 KB
+
+## 40.1 Protokoll-Konstanten
+
+```python
+ATCNET_VERSION = 1
+ATCNET_PORT    = 4001          # Standard-Port
+MAGIC_BYTES    = b"\xAT\xC0\x01"  # ATC Magic Header
+MAX_MSG_SIZE   = 4 * 1024 * 1024  # 4 MB Max-Nachrichtengröße
+K_BUCKET_SIZE  = 20            # Kademlia k-Wert
+ALPHA          = 3             # Parallele DHT-Lookups
+TTL_DEFAULT    = 10            # Max Hop-Count
+```
+
+## 40.2 Nachrichtentypen (ATC-0007 Protokoll)
+
+| ID | MsgType | Beschreibung |
+|----|---------|-------------|
+| 1  | HELLO | Node-Handshake (Verbindungsaufbau) |
+| 2  | PING | Liveness-Check |
+| 3  | PONG | Antwort auf PING |
+| 4  | GET_PEERS | Peers-Anfrage |
+| 5  | PEERS | Peers-Antwort (Bucket) |
+| 6  | GET_BLOCK | Block anfordern |
+| 7  | BLOCK | Block senden |
+| 8  | BROADCAST_TX | Transaktion senden |
+| 9  | TX | Transaktion empfangen |
+| 10 | CONSENSUS_VOTE | Consensus-Abstimmung |
+
+## 40.3 DHT-Routing (Kademlia-basiert)
+
+```
+Node-ID: SHA3-256(Public Key) → 256-bit Adresse
+Routing: XOR-Metrik für Node-Distanz
+k-Buckets: 256 Buckets × 20 Einträge = max. 5.120 bekannte Peers
+Lookup: α=3 parallele Anfragen pro Schritt
+```
+
+## 40.4 Verbindungsaufbau
+
+```
+Neuer Node
+    │
+    ▼
+[HELLO senden] → Magic-Bytes + Version + Node-ID + Port
+    │
+    ▼
+[GET_PEERS] → Bootstrap-Node antwortet mit bekannten Peers
+    │
+    ▼
+[k-Bucket befüllen] → Iterativer DHT-Lookup
+    │
+    ▼
+[Sync] → Initial Chain Sync via GET_BLOCK (Issue #16)
+```
+
+---
+
+# 41. Hybrid-Konsens — PoW + PoS + PoH
+
+> Datei: `code/blockchain/consensus/hybrid_consensus.py` | 3.3 KB
+
+## 41.1 Konsens-Reihenfolge pro Block
+
+```
+1. PoH  → Verifizierbarer Zeitstempel (Proof of History)
+2. PoW  → Miner sucht gültigen SHA-256 Hash
+3. PoS  → Validator bestätigt & signiert den Block
+```
+
+## 41.2 Klasse: HybridConsensus
+
+```python
+class HybridConsensus:
+    def __init__(self, difficulty: int = 3):
+        self.pow    = ProofOfWork(difficulty)   # SHA-256
+        self.pos    = ProofOfStake()
+        self.poh    = ProofOfHistory()
+        self.blocks = []
+        self.height = 0
+    
+    def create_block(self, transactions: list, miner: str) -> dict
+    def validate_block(self, block: dict) -> bool
+    def add_block(self, block: dict) -> bool
+```
+
+## 41.3 PoH — Proof of History
+
+| Parameter | Wert |
+|-----------|------|
+| Algorithmus | SHA-256 sequenzielle Verkettung |
+| Tick-Interval | konfigurierbar (Standard: 400ms) |
+| Methoden | `tick()`, `tick_n(n)`, `verify_sequence()` |
+| Zweck | Verifizierbarer Beweis für Zeitablauf (kein vertrauenswürdiger NTP) |
+
+## 41.4 PoW — Proof of Work
+
+| Parameter | Wert |
+|-----------|------|
+| Algorithmus | SHA-256 |
+| Difficulty | Dynamisch angepasst (Ziel: 6s/Block) |
+| Nonce | 32-bit Integer |
+| Target | `hash.startswith("0" * difficulty)` |
+
+## 41.5 PoS — Proof of Stake
+
+| Parameter | Wert |
+|-----------|------|
+| Min. Stake | 10.000 KAI |
+| Validator-Set | Dynamisch (max. 100 Aktive) |
+| Slashing | Bei Doppelsignierung oder Offline-Periode |
+| Belohnung | 5% APY + Block-Gebühren |
+
+---
+
+# 42. Wallet & Kryptographie
+
+> Dateien: `blockchain/wallet/keygen.py`, `blockchain/wallet/ecdsa.py`
+
+## 42.1 Schlüssel-Generierung (ATCKeyGenerator)
+
+```python
+class ATCKeyGenerator:
+    def generate_entropy(self, bits: int = 256) -> bytes
+    # Unterstützte Größen: 128, 160, 192, 224, 256 Bit
+    # Quelle: os.urandom() — kryptographisch sicher
+    
+    def entropy_to_mnemonic(self, entropy: bytes) -> List[str]
+    # BIP39-kompatibel, 24 Wörter bei 256-bit Entropy
+    
+    def mnemonic_to_seed(self, mnemonic: List[str], passphrase: str = "") -> bytes
+    # PBKDF2-HMAC-SHA512, 2048 Iterationen
+    
+    def derive_private_key(self, seed: bytes) -> str
+    # SHA-256(seed) → 64 hex chars
+    
+    def derive_public_key(self, private_key: str) -> str
+    # SHA-256(private_key) → 64 hex chars
+    
+    def derive_address(self, public_key: str) -> str
+    # "ATC" + SHA-256(public_key)[:32] → 35 Zeichen
+    # Beispiel: ATC1a2b3c4d5e6f7a8b9c0d1e2f3a4b5c6d7
+```
+
+## 42.2 Adress-Format
+
+```
+Präfix:   "ATC"           (3 Zeichen, fixes Präfix)
+Hash:     SHA-256(pubkey)[:32]  (32 hex-Zeichen)
+Gesamt:   35 Zeichen
+Beispiel: ATC1a2b3c4d5e6f7a8b9c0d1e2f3a4b5c6d
+```
+
+## 42.3 ECDSA (secp256k1)
+
+| Parameter | Wert |
+|-----------|------|
+| Kurve | secp256k1 (identisch zu Bitcoin/Ethereum) |
+| Signatur | 64 Bytes (r, s je 32 Bytes) |
+| Datei | `blockchain/wallet/ecdsa.py` (2.8 KB) |
+| Verifikation | `verify(message_hash, signature, public_key)` |
+
+---
+
+# 43. Smart Contracts — System-Contracts
+
+> Datei: `code/blockchain/smart_contracts.py` | 24.1 KB
+
+## 43.1 Token-Standards
+
+```python
+class TokenStandard(Enum):
+    KAI_GOVERNANCE = "kai"       # Governance & Staking Token
+    COMPUTE        = "compute"   # Utility: Rechenzeit
+    REPUTATION     = "reputation" # Non-transferable (Soulbound)
+```
+
+## 43.2 ATC-8300 — Fungible Token Standard
+
+Entspricht konzeptionell ERC-20 auf Ethereum, aber vollständig eigenständig:
+
+| Feld | Typ | Beschreibung |
+|------|-----|-------------|
+| token_id | str | Format: `ATC-8300-{uuid4}` |
+| name | str | Token-Name |
+| symbol | str | 3–5 Zeichen |
+| decimals | int | Standard: 12 (Planck) |
+| total_supply | int | In Planck (10⁻¹²) |
+| owner | str | ATC-Adresse des Eigentümers |
+
+```python
+class ATCToken:  # Legacy ATC Token (Kompatibilität)
+    def transfer(to: str, amount: int) -> bool
+    def approve(spender: str, amount: int) -> bool
+    def transfer_from(sender: str, to: str, amount: int) -> bool
+    def balance_of(address: str) -> int
+    def allowance(owner: str, spender: str) -> int
+```
+
+## 43.3 Governance-Contract
+
+```python
+class KAIGovernance:
+    # Proposal erstellen
+    def submit_proposal(title: str, description: str, 
+                        calldata: bytes, proposer: str) -> str
+    
+    # Abstimmen (weighted by KAI stake)
+    def vote(proposal_id: str, voter: str, 
+             support: bool, weight: int) -> bool
+    
+    # Proposal ausführen (nach Quorum)
+    def execute_proposal(proposal_id: str) -> bool
+    
+    # Quorum: 10% der gesamten KAI-Supply muss abstimmen
+    # Mehrheit: >50% Ja-Stimmen
+    # Timelock: 48h nach Vote-Ende vor Ausführung
+```
+
+## 43.4 Federated Learning Contract
+
+```python
+class FederatedLearningContract:
+    def submit_model_update(
+        node_id: str, 
+        model_hash: str,
+        gradient_commitment: str
+    ) -> str   # Returns update_id
+    
+    def aggregate_updates(round_id: str) -> str  # Returns global_model_hash
+    
+    def verify_update(update_id: str) -> bool
+```
+
+---
+
+# 44. Shivamon NFT — ATC-9000 Standard
+
+> Datei: `blockchain/contracts/shivamon/shivamon_contract.py` | Dok: `docs/contracts/SHIVAMON_NFT_CONTRACT.md` | 10.5 KB / 20 KB
+
+## 44.1 Überblick
+
+| Eigenschaft | Wert |
+|-------------|------|
+| Standard | ATC-9000 |
+| Max Supply | 9.900 NFTs |
+| Elemente | 7 (Fire, Water, Earth, Air, Shadow, Neon, Quantum) |
+| Rarities | 6 (Common, Uncommon, Rare, Epic, Legendary, Genesis) |
+| Generationen | Unbegrenzt (Gen 1 = native) |
+| DNA-Länge | 64 Zeichen (SHA-256) |
+
+## 44.2 Rarity-Verteilung
+
+| Rarity | Anteil | Supply |
+|--------|--------|--------|
+| Common | 45% | ~4.455 |
+| Uncommon | 25% | ~2.475 |
+| Rare | 15% | ~1.485 |
+| Epic | 10% | ~990 |
+| Legendary | 4% | ~396 |
+| Genesis | 1% | ~99 |
+
+## 44.3 DNA-System
+
+```
+DNA = SHA-256(token_id + element + birth_block + entropy)
+→ 64 hex Zeichen
+
+DNA bestimmt:
+  - Basis-Kampfwerte (HP, ATK, DEF, SPD)
+  - Spezialfähigkeiten (2–4 je Rarity)
+  - Visuelle Traits (Farbe, Form, Aura)
+  - Breeding-Kompatibilität
+```
+
+## 44.4 Breeding-Mechanismus (Issue #11)
+
+```python
+def breed(parent_a_id: str, parent_b_id: str, 
+          caller: str) -> Optional[str]:
+    """
+    Erstellt Kind-NFT aus zwei Eltern.
+    
+    Regeln:
+    - Beide Eltern müssen caller gehören
+    - Cooldown: 7 Tage nach letztem Breeding
+    - Kosten: 100 KAI (Burning)
+    - Kind-Rarity: weighted_random(parent_rarities)
+    - Kind-DNA: crossover(parent_a.dna, parent_b.dna) + mutation
+    """
+```
+
+## 44.5 Battle-System (Issue #3)
+
+```python
+def initiate_battle(attacker_id: str, 
+                    defender_id: str, caller: str) -> str:
+    """
+    Startet einen on-chain Kampf.
+    
+    Ablauf:
+    1. Kampfwerte laden (HP, ATK, DEF, SPD)
+    2. Initiativ-Roll: SPD + random_seed(block_hash)
+    3. Rundenkampf (max. 20 Runden)
+    4. Schaden: ATK - DEF/2 (min. 1)
+    5. Ergebnis on-chain loggen
+    6. XP + Belohnungen verteilen
+    
+    Returns: battle_id (TX-Hash)
+    """
+```
+
+---
+
+# 45. ATCLang — Sprachspezifikation
+
+> Dateien: `code/atclang/` | Dok: `docs/atclang/ATCLANG_SPEC_FULL.md` | Version: 0.2.0-alpha
+
+## 45.1 Übersicht
+
+ATCLang ist die native Blockchain-Programmiersprache des A-TownChain Ökosystems.
+
+| Eigenschaft | Beschreibung |
+|-------------|-------------|
+| Paradigma | Imperativ + Contract-Oriented |
+| Typsystem | Statisch typisiert |
+| Ausführung | Stack-basierte VM (ATCVM) |
+| Dateiendung | `.atc` |
+| Compiler | Python → Bytecode-Liste |
+
+## 45.2 Toolchain-Pipeline
+
+```
+Quellcode (.atc)
+     │
+  [Lexer]     lexer/lexer.py       272 Zeilen → Token-Stream
+     │
+  [Parser]    parser/parser.py     376 Zeilen → AST
+     │
+  [Compiler]  compiler/compiler.py 455 Zeilen → Bytecode
+     │
+  [ATCVM]     vm/atcvm.py          330 Zeilen → Ausführung
+     │
+  [Blockchain]                               → Events + State
+```
+
+## 45.3 Schlüsselwörter (51 gesamt)
+
+```
+Deklaration:  wallet  contract  fn  state  event  struct
+Kontrolle:    if  else  while  for  break  return  require
+Typen:        UInt256  Address  Bool  String  Map  List
+Blockchain:   emit  caller  block  tx  this
+Spezial:      ATC::  @decorator
+```
+
+## 45.4 Token-Typen (Lexer)
+
+| Kategorie | Beispiele |
+|-----------|-----------|
+| KEYWORD | `wallet`, `contract`, `fn`, `state`, `emit` |
+| TYPE | `UInt256`, `Address`, `Bool`, `String`, `Map`, `List` |
+| OPERATOR | `+`, `-`, `*`, `/`, `>=`, `<=`, `==`, `!=`, `->`, `::` |
+| LITERAL | Integer, String, Bool |
+| SPECIAL | `ATC::` (Namespace), `@decorator` |
+
+## 45.5 Beispiel-Contract (ATCLang)
+
+```atclang
+// ATC-8300 Token Contract
+contract ShivaToken : ATC-8300 {
+    state balance: Map<Address, UInt256>
+    state totalSupply: UInt256 = 1_000_000
+
+    event Transfer(from: Address, to: Address, amount: UInt256)
+
+    fn transfer(to: Address, amount: UInt256) -> Bool {
+        require(balance[caller] >= amount)
+        balance[caller] -= amount
+        balance[to]     += amount
+        emit Transfer(caller, to, amount)
+        return true
+    }
+
+    fn balanceOf(addr: Address) -> UInt256 {
+        return balance[addr]
+    }
+}
+```
+
+## 45.6 ATCVM — Stack-Virtuelle Maschine
+
+```
+Opcodes (Auswahl):
+
+PUSH <val>    → Wert auf Stack legen
+POP           → Wert vom Stack nehmen
+ADD / SUB / MUL / DIV → Arithmetik
+EQ / NEQ / GT / LT    → Vergleiche
+JUMP <label>  → Unbedingter Sprung
+JUMPI <label> → Bedingter Sprung
+CALL <fn>     → Funktion aufrufen
+RETURN        → Funktion verlassen
+EMIT <event>  → Blockchain-Event
+SLOAD <key>   → State lesen
+SSTORE <key>  → State schreiben
+```
+
+---
+
+# 46. API-Gateway — Technische Dokumentation
+
+> Datei: `code/gateway/` | Port: 4000 | ATS-1005 konform
+
+## 46.1 Architektur
+
+```
+Client
+  │
+  ▼
+[API-Gateway :4000]
+  │
+  ├── [Auth Middleware]        → API-Key Validierung
+  ├── [Rate Limiter]           → Burst-Schutz
+  ├── [Signature Verifier]     → Request-Signatur
+  └── [Logger]                 → Request-Logging
+  │
+  ▼
+[Router]
+  ├── /core    → KAI-OS Core API (:8000)
+  ├── /chain   → Blockchain API (:8001)
+  ├── /wallet  → Wallet API (:8002)
+  ├── /ai      → KI-API (:8003)
+  └── /game    → Game API (:8004)
+```
+
+## 46.2 Middleware-Stack
+
+```python
+# gateway/middleware/auth.py
+def authenticate(api_key: str) -> bool
+# API-Keys: SHA-256 Hash in Datenbank, nie Plaintext gespeichert
+
+# gateway/middleware/rate_limit.py
+RATE_LIMITS = {
+    "default":     100,   # Requests/Minute
+    "ai":           20,   # Requests/Minute (GPU-intensiv)
+    "blockchain":   50,   # Requests/Minute
+}
+
+# gateway/middleware/signature_verify.py
+def verify_signature(request_body: bytes, 
+                     signature: str, 
+                     public_key: str) -> bool
+# ECDSA secp256k1 Signatur-Verifikation
+
+# gateway/middleware/logger.py
+# Format: timestamp | method | path | status | latency_ms
+```
+
+## 46.3 Wichtige Routes (kai_routes.py)
+
+```python
+# Agent Management
+GET    /v1/agents              # Alle Agenten auflisten
+POST   /v1/agents              # Neuen Agenten deployen
+GET    /v1/agents/{id}         # Agenten-Details
+DELETE /v1/agents/{id}         # Agenten entfernen
+POST   /v1/agents/{id}/tasks   # Task starten
+
+# Storage
+POST   /v1/storage/upload      # Datei hochladen (ATCFS)
+GET    /v1/storage/{cid}       # Datei abrufen
+DELETE /v1/storage/{cid}       # Datei löschen
+
+# Blockchain
+GET    /v1/chain/blocks/{n}    # Block abrufen
+GET    /v1/chain/tx/{hash}     # Transaktion abrufen
+POST   /v1/chain/tx            # Transaktion senden
+
+# Governance
+GET    /v1/governance/proposals         # Proposals auflisten
+POST   /v1/governance/proposals         # Proposal einreichen
+POST   /v1/governance/vote              # Abstimmen
+```
+
+---
+
+# 47. Testnet — Setup & Betrieb
+
+> Datei: `docs/architecture/TESTNET.md` | v2.2.0 | Issues #8, #14–#19
+
+## 47.1 Überblick
+
+Das A-TownChain Testnet besteht aus **5 Docker-Nodes**, gestartet mit einem einzigen Befehl.
+
+## 47.2 Docker-Compose Konfiguration
+
+```yaml
+# patches/docker-compose.yml
+version: "3.8"
+services:
+  node1:  # Bootstrap-Node
+    build: .
+    ports:
+      - "4001:4001"   # ATCNet P2P
+      - "9933:9933"   # RPC HTTP
+      - "9944:9944"   # RPC WebSocket
+    environment:
+      - NODE_ROLE=bootstrap
+      - DIFFICULTY=3
+
+  node2: node3: node4: node5:
+    # Standard-Nodes, verbinden sich zu node1
+    environment:
+      - BOOTSTRAP_PEER=node1:4001
+```
+
+## 47.3 Testnet starten
+
+```bash
+# 1. Repository klonen
+git clone https://github.com/A-TownChain-Okosystems/a-townchain-os
+cd a-townchain-os
+
+# 2. Patches anwenden
+bash <(curl -s https://raw.githubusercontent.com/ShivaCoreDev/kai-os-wiki/main/patches/APPLY_FIXES.sh)
+
+# 3. Docker-Compose starten
+docker-compose up --build
+
+# 4. Status prüfen
+curl http://localhost:9933 -H "Content-Type: application/json" \
+  -d '{"id":1,"jsonrpc":"2.0","method":"kai_chainHead","params":[]}'
+```
+
+## 47.4 Offene Testnet-Issues
+
+| Issue | Titel | Status |
+|-------|-------|--------|
+| #14 | Bootstrap Node P2P Discovery | 🔄 In Progress |
+| #15 | Block Propagation P2P | 🔄 In Progress |
+| #16 | Initial Sync — Neue Nodes | 🔄 In Progress |
+| #17 | Longest-Chain-Rule (Fork) | 🔄 In Progress |
+| #18 | Docker Compose 5-Node | 🔄 In Progress |
+| #19 | Node-Monitoring Dashboard | 🔄 In Progress |
+| #8 | Multi-Node Testnet | 🔄 In Progress |
+
+---
+
+# 48. CI/CD — GitHub Actions Workflows
+
+> Dateien: `code/.github/workflows/`
+
+## 48.1 Workflows Übersicht
+
+| Datei | Trigger | Zweck |
+|-------|---------|-------|
+| `ci.yml` | Push/PR → main | Unit-Tests + Linting |
+| `codeql.yml` | Push/PR + Schedule | Sicherheits-Scan |
+| `docker.yml` | Release | Docker-Image bauen + pushen |
+| `pages.yml` | Push → main | GitHub Pages Deploy |
+
+## 48.2 CI Pipeline (ci.yml)
+
+```yaml
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - checkout
+      - python 3.11 setup
+      - pip install -r requirements-kai.txt
+      - pytest tests/ --cov=. --cov-report=xml
+      # Ziel: >80% Coverage
+
+  lint:
+    - flake8 code/
+    - black --check code/
+```
+
+## 48.3 CodeQL Sicherheits-Scan
+
+- Läuft täglich + bei jedem Push
+- Scannt auf: SQL Injection, Path Traversal, Command Injection, Hardcoded Secrets
+- Sprachen: Python, JavaScript
+
+---
+
+# 49. Datenbank-Schema
+
+> Datei: `code/backend/db/schema.sql` | 2.2 KB
+
+## 49.1 Haupt-Tabellen
+
+```sql
+-- Agenten
+CREATE TABLE agents (
+    id          TEXT PRIMARY KEY,   -- UUID
+    owner       TEXT NOT NULL,      -- ATC-Adresse
+    name        TEXT NOT NULL,
+    model       TEXT,               -- llama3-8b-q4, etc.
+    status      TEXT DEFAULT 'active',
+    capabilities JSON,
+    created_at  TIMESTAMP DEFAULT NOW()
+);
+
+-- Transaktionen
+CREATE TABLE transactions (
+    tx_hash     TEXT PRIMARY KEY,   -- SHA-256 Hash
+    from_addr   TEXT NOT NULL,
+    to_addr     TEXT NOT NULL,
+    amount      BIGINT,             -- In Planck
+    token_type  TEXT,
+    block_num   INTEGER,
+    timestamp   TIMESTAMP
+);
+
+-- Smart Contracts
+CREATE TABLE contracts (
+    contract_id TEXT PRIMARY KEY,
+    owner       TEXT NOT NULL,
+    bytecode    BYTEA,
+    abi         JSON,
+    state       JSON,
+    deployed_at TIMESTAMP
+);
+
+-- Governance Proposals
+CREATE TABLE proposals (
+    proposal_id TEXT PRIMARY KEY,
+    proposer    TEXT NOT NULL,
+    title       TEXT,
+    description TEXT,
+    status      TEXT,   -- pending, active, passed, failed, executed
+    yes_votes   BIGINT DEFAULT 0,
+    no_votes    BIGINT DEFAULT 0,
+    created_at  TIMESTAMP,
+    execute_at  TIMESTAMP
+);
+```
+
+---
+
+# 50. ATC & ATS Standards — Referenz
+
+> Datei: `docs/standards/ATC_ECOSYSTEM_STANDARDS.md` | 13.8 KB
+
+## 50.1 ATC-Standards (Core Standards)
+
+| Standard | Titel | Datei |
+|----------|-------|-------|
+| ATC-001 | Genesis Block | `blockchain/atcoin/atcoin.py` |
+| ATC-8300 | Fungible Token (wie ERC-20) | `blockchain/contracts/atc8300/` |
+| ATC-9000 | NFT Standard (wie ERC-721) | `blockchain/contracts/shivamon/` |
+| ATC-9900 | Governance Token | `patches/atc9900_governance.py` |
+
+## 50.2 ATS-Standards (Technical Standards)
+
+| Standard | Titel | Implementierung |
+|----------|-------|----------------|
+| ATS-1000 | Kernel API | `shivaos/kernel/kernel.py` |
+| ATS-1001 | Process Model | ShivaOS Scheduler |
+| ATS-1002 | Dateisystem (ATCFS) | `shivaos/fs/atcfs.py` |
+| ATS-1003 | Memory Model | MemRegion Klasse |
+| ATS-1004 | IPC (Inter-Process Communication) | `core/event_bus.py` |
+| ATS-1005 | API-Gateway | `gateway/main.py` |
+| ATS-1006 | P2P Netzwerk (ATCNet) | `shivaos/net/atcnet.py` |
+| ATS-1007 | Nachrichtenprotokoll | MsgType Enum |
+
+## 50.3 ATC-001 Genesis Block
+
+```python
+GENESIS_BLOCK = {
+    "index":      0,
+    "timestamp":  "2026-01-01T00:00:00Z",
+    "data":       "KAI-OS Genesis — A-TownChain v1.0",
+    "prev_hash":  "0" * 64,          # Unveränderlich
+    "hash":       "<BLAKE2b-256>",
+    "nonce":      0,
+    "difficulty": 1,
+    "validator":  "genesis",
+    "signature":  None
+}
+# Regeln: prev_hash immer 64 Nullen, index immer 0
+# Alle Nodes müssen identischen Genesis-Hash haben
+```
+
+---
+
+> *Kapitel 36–50 automatisch generiert aus Quellcode-Analyse | KAI-OS Agent | 2026-06-09*
+> *Nächster Auto-Sync: täglich 08:00 Uhr + alle 6h*
+
