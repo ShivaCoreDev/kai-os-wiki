@@ -1,92 +1,86 @@
-# KAI-OS Wiki — Projektstatus (Live)
+# KAI-OS Wiki — Live Projektstatus
 
-> Letzte Aktualisierung: 2026-06-09 03:00 | Superagent (KAI-OS Agent)
-
-## Repository-Info
-
-| Metrik | KAI-OS Wiki | A-TownChain OS |
-|--------|-------------|----------------|
-| Version | v1.3.3-beta | v2.0 ShivaOS |
-| Kapitel | 52 (vollständig) | — |
-| Dokumentationszeilen | 9.500+ | — |
-| Repo-Größe | ~1.1 MB | 485 KB |
-| Letztes Update | 2026-06-09 | 2026-06-09 |
-| Auto-Sync | KAI-OS Agent | KAI-OS Agent |
+> Auto-Sync: 2026-06-10 05:42 UTC | Quellen: GitHub + Notion + Google Sheets
 
 ---
 
-## A-TownChain OS — Branches
+## Repositories
 
-| Branch | Letzter Commit | Status | Inhalt |
-|--------|---------------|--------|--------|
-| main | 2026-06-09 | Aktiv | Hauptentwicklung |
-| feature/kai-os-integration | 2026-06-09 | ⚠️ Bereit für Merge! | ATCLang, KAI-OS Integration |
-| feature/bootstrap-node | 2026-05-22 | ⚠️ Bereit für Merge! | P2P Discovery, Smart Contracts |
-| feature/solidity-contracts | 2026-05-23 | ⚠️ Bereit für Merge! | ATCToken.sol, Tests |
-| fix/implement-gateway-backend | 2026-05-18 | ⚠️ Bereit für Merge! | Gateway-Middleware |
+| Repo | Größe | Branch |
+|------|-------|--------|
+| A-TownChain OS | 625 KB | feature/kai-os-integration |
+| KAI-OS Wiki | 923 KB | main |
 
 ---
 
-## Issues — Live Status
+## Issues
 
-| # | Titel | Priorität | Sprint | Status |
-|---|-------|-----------|--------|--------|
-| #22 | KAI-OS v1.3.2-beta Substrate | HIGH | 2.1 | 🔄 In Progress |
-| #14 | Bootstrap Node P2P | HIGH | 2.2 | 🔄 In Progress |
-| #15 | Block Propagation P2P | HIGH | 2.2 | 🔄 In Progress |
-| #16 | Initial Sync | HIGH | 2.2 | 🔄 In Progress |
-| #17 | Fork-Auflösung (Longest-Chain) | HIGH | 2.2 | 🔄 In Progress |
-| #8 | Multi-Node Testnet | HIGH | 2.2 | 🔄 In Progress |
-| #20 | API-Gateway-Tests | HIGH | 2.7 | 🔄 In Progress |
-| #3 | Battle UI | HIGH | 2.8 | 🔄 In Progress |
-| #19 | Node-Monitoring Dashboard | MEDIUM | 2.2 | 🔄 In Progress |
-| #18 | Docker Compose 5-Node | MEDIUM | 2.2 | 🔄 In Progress |
-| #12 | Solidity Contracts | MEDIUM | 2.3 | ⚠️ Fast fertig! |
-| #9 | Governance DAO | MEDIUM | 2.3 | 🔄 In Progress |
-| #5 | Blockchain Explorer | MEDIUM | 2.3 | 🔄 In Progress |
-| #7 | Build System EXE | MEDIUM | 2.3 | 🔄 In Progress |
-| #13 | ATC Marketplace | MEDIUM | 2.5 | 🔄 In Progress |
-| #11 | Shivamon Breeding | MEDIUM | 2.8 | 🔄 In Progress |
-| #10 | Cross-Chain Bridge | LOW | 3.10 | 🔄 In Progress |
-| #2 | Gemini AI Integration | HIGH | 2.3 | ✅ CLOSED 2026-06-09 |
+| Kategorie | Anzahl |
+|-----------|--------|
+| Offen gesamt | **8** |
+| Priorität HIGH | 1 |
+| Priorität MEDIUM | 6 |
+| Blockchain | 4 |
+| Frontend/UI | 1 |
+| Gaming/NFT | 2 |
+| Geschlossen (gesamt) | 14 |
 
-**Gesamt offen: 16** | **Sofort mergen: 4 Branches** | **Fast fertig: #12**
+### Offene Issues
 
----
-
-## Wiki — Kapitel-Übersicht (Stand 2026-06-09)
-
-| Kapitel | Thema | Status |
-|---------|-------|--------|
-| 1–21 | Konzept, Architektur, API, CLI, Testing, Deployment, Glossar | ✅ |
-| 22–31 | Debugging, CI/CD, Kernel, Security, DeFi, Gaming, Status | ✅ |
-| 32 | Solana Integration (Anchor, ATC-SPL, Wormhole) | ✅ NEU |
-| 33 | Ethereum/EVM (Frontier-Pallet, Solidity Suite, MetaMask) | ✅ NEU |
-| 34 | Cross-Chain Bridge Architektur | ✅ NEU |
-| 35 | LLM-Router & Model-Registry | ✅ NEU |
-| 36–50 | Software-Referenz (Code-Analyse) | ✅ NEU |
-| 51 | AI Safety & Alignment Framework | ✅ NEU |
-| 52 | ShivaOS Kernel (Technische Doku) | ✅ NEU |
+| # | Titel | Priorität | Tags |
+|---|-------|-----------|------|
+| #19 | 📊 [Testnet] Node-Monitoring Dashboard              | priority:medium | enhancement frontend |
+| #18 | 🐳 [Testnet] Docker Compose — 5-Node lokales Netzwe | priority:medium | enhancement blockchain |
+| #13 | 🛒 ATC Marketplace — Shivamon kaufen & verkaufen    | priority:medium | enhancement game |
+| #12 | ⛓ Solidity Smart Contracts — On-Chain ATC Token    | priority:medium | enhancement blockchain |
+| #11 | 🥚 Shivamon Breeding — Gen 2 NFT Züchtung           | priority:medium | enhancement game |
+| #10 | 🌉 Cross-Chain Bridge — ATC ↔ EVM Interoperabilität | priority:low    | enhancement blockchain |
+| # 8 | 🌐 Multi-Node Testnet — P2P Netzwerk live schalten  | priority:high   | enhancement blockchain |
+| # 7 | 📦 Build System — EXE / AppImage Installer          | priority:medium | enhancement build |
 
 ---
 
-## Wiki-Audit — Bekannte Offene Punkte
+## Branches
 
-| # | Problem | Status |
-|---|---------|--------|
-| F-04 | 14 defekte TOC-Links (Anker-Format) | 🔄 Offen |
-| F-05 | Kap. 21 (Glossar) physisch falsch sortiert | 🔄 Offen |
+| Branch | SHA |
+|--------|-----|
+| `main` | `ed26806` |
+
+---
+
+## Letzte Commits (2026-06-10)
+
+| SHA | Datum | Autor | Nachricht |
+|-----|-------|-------|-----------|
+| ed26806 | 2026-06-10 | KAI-OS Automation    | fix: Expand logger.py & build.py with structured logging & m |
+| 92cfda4 | 2026-06-09 | ShivaCoreDev         | 🔧 CHANGELOG: Mapping-Hinweis für umbenannte Repos hinzugefüg |
+| 60c76d7 | 2026-06-09 | ShivaCoreDev         | ⚠️ DEPRECATED: smart_contract_registry.py → blockchain/contr |
+| 51da435 | 2026-06-09 | ShivaCoreDev         | ⚠️ DEPRECATED: blockchain/smart_contracts.py → blockchain/co |
+| da02a95 | 2026-06-09 | ShivaCoreDev         | 🔧 core/kernel.py: Kommentar — L3 AI-Kernel vs L2 Microkernel |
+| e3609ff | 2026-06-09 | ShivaCoreDev         | 📦 DEPRECATED.md v2.0.0: vollständige Liste aller gelöschten/ |
+| 7f2bc22 | 2026-06-09 | ShivaCoreDev         | 🔧 Referenzen aktualisiert: veraltete Repo-Namen/Branch berei |
+| c0e57bd | 2026-06-09 | ShivaCoreDev         | 🔧 Referenzen aktualisiert: veraltete Repo-Namen/Branch berei |
 
 ---
 
 ## Traffic (letzte 14 Tage)
 
-| Datum | Clones | Unique |
-|-------|--------|--------|
-| 2026-06-01 | 146 | 67 |
-| 2026-06-06 | 280 | 89 |
-| **Gesamt** | **561** | **201** |
+| Metrik | Wert |
+|--------|------|
+| Clones gesamt | 561 |
+| Unique Clone-IPs | 201 |
+| Views gesamt | 39 |
+| Unique Visitors | 2 |
 
 ---
 
-*Auto-generiert von KAI-OS Agent — 2026-06-09 03:00*
+## Notion
+
+| Metrik | Wert |
+|--------|------|
+| Seiten synchronisiert | 50 |
+| Letzter Sync | 2026-06-10 05:42 UTC |
+
+---
+
+*Auto-generiert von KAI-OS Sync Agent — 2026-06-10 05:42 UTC*
