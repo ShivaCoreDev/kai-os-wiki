@@ -1,51 +1,40 @@
-# KAI-OS Wiki — Auto-Sync Status
+# KAI-OS + A-TownChain OS — Live Status
 
-> Letzte Aktualisierung: 2026-06-10 05:42 | Auto-generiert von Superagent
+**Last Updated:** 2026-06-14 06:02 UTC
 
-## Repository-Snapshot
+## Project Metrics
 
-| Metrik | KAI-OS Wiki | A-TownChain OS |
-|--------|-------------|----------------|
-| Größe | 923 KB | 625 KB |
-| Stars | 0 | 1 |
-| Default Branch | main | main |
-| Letzter Commit | 🤖 auto-sync: STATUS.md — 2026-06-10 05:42 | fix: Expand logger.py & build.py with structured logging & m |
+| Metric | Wiki | A-TownChain OS |
+|--------|------|----------------|
+| **Open Issues** | 0 | 6 |
+| **Commits (7d)** | 10 | 30 |
+| **Main Progress** | 100% | ~68% |
+| **Health Score** | ✅ | ⚠️ (Test coverage 14%) |
 
-## Issues — Live
+## Critical Path Issues (A-TownChain OS)
 
-### Offen (8)
-| # | Priorität | Titel |
-|---|-----------|-------|
-| # 7 | priority:medium | 📦 Build System — EXE / AppImage Installer |
-| # 8 | priority:high   | 🌐 Multi-Node Testnet — P2P Netzwerk live schalten |
-| #10 | priority:low    | 🌉 Cross-Chain Bridge — ATC ↔ EVM Interoperabilität |
-| #11 | priority:medium | 🥚 Shivamon Breeding — Gen 2 NFT Züchtung |
-| #12 | priority:medium | ⛓ Solidity Smart Contracts — On-Chain ATC Token |
-| #13 | priority:medium | 🛒 ATC Marketplace — Shivamon kaufen & verkaufen |
-| #18 | priority:medium | 🐳 [Testnet] Docker Compose — 5-Node lokales Netzwerk |
-| #19 | priority:medium | 📊 [Testnet] Node-Monitoring Dashboard |
+- **#67** v3.2.1 — Docker: Testnet Health-Checks + CI/CD Pipeline
+  - Labels: priority:medium, build, testnet, devops
+- **#52** #52 — Mainnet Launch Manager: Genesis-Block (Kap. 55)
+  - Labels: enhancement, priority:low, mainnet
+- **#49** #49 — BigQuery Analytics Pipeline (Kap. 60)
+  - Labels: enhancement, priority:medium, analytics
+- **#47** ZKP Zero-Knowledge Proofs — L0 Security Layer (Kap. 25)
+  - Labels: enhancement, security, priority:low
+- **#46** Mobile Wallet — Biometrie & Push-Notifications (Kap. 38)
+  - Labels: enhancement, mobile
 
-### Zuletzt Geschlossen
-| # | Datum | Titel |
-|---|-------|-------|
-| # 9 | 2026-06-09 | 🏛 Governance Contract (ATC-9900) — DAO Voting |
-| # 5 | 2026-06-09 | 🌐 ATC Blockchain Explorer — Block & TX Browser |
-| # 3 | 2026-06-09 | ⚔️ Shivamon Battle UI — Animierte Kämpfe im Browser |
-| #20 | 2026-06-09 | 🧪 API-Gateway-Tests — Unit & Integrationstests für Port |
-| #17 | 2026-06-09 | ⛓ [Testnet] Longest-Chain-Rule — Fork-Auflösung |
-| #16 | 2026-06-09 | 🔄 [Testnet] Initial Sync — Neue Nodes synchronisieren |
-| #15 | 2026-06-09 | 📡 [Testnet] Block Propagation — P2P Block Broadcasting |
-| #14 | 2026-06-09 | 🌐 [Testnet] Bootstrap Node — P2P Discovery Service |
-| #22 | 2026-06-09 | 🚀 KAI-OS v1.3.2-beta — Substrate-Integration + DevOps-A |
-| # 2 | 2026-06-09 | 🤖 Gemini AI Integration — Live AI-Chat im Dashboard |
 
-## Traffic (letzte 14 Tage)
+## Recent Commits (ATC)
 
-| Metrik | Wert |
-|--------|------|
-| Clones gesamt | 561 |
-| Unique IPs | 201 |
-| Views gesamt | 39 |
-| Unique Visitors | 2 |
+Latest 5 commits fetched at 2026-06-14 06:02 UTC
 
-*Auto-generiert von Superagent — 2026-06-10 05:42*
+## Next Steps
+
+1. **#67** — Docker CI/CD Pipeline (priority:medium)
+2. **#52** — Mainnet Launch Manager (priority:low)
+3. **#49** — BigQuery Analytics (priority:medium)
+4. Increase test coverage from 14% → 60%
+
+---
+*Automated daily sync by Aurora v3.2 | 2026-06-14 06:02 UTC*
